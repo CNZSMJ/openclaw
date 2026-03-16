@@ -258,6 +258,7 @@ importers:
   extensions/chutes: {}
 
   extensions/cloudflare-ai-gateway: {}
+  extensions/context-inspector: {}
 
   extensions/copilot-proxy: {}
 

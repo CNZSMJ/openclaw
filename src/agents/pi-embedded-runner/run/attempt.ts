@@ -5,6 +5,7 @@ import { streamSimple } from "@mariozechner/pi-ai";
 import {
   createAgentSession,
   DefaultResourceLoader,
+  estimateTokens,
   SessionManager,
 } from "@mariozechner/pi-coding-agent";
 import {
@@ -26,6 +27,7 @@ import type {
   PluginHookAgentContext,
   PluginHookBeforeAgentStartResult,
   PluginHookBeforePromptBuildResult,
+  PluginHookLlmInputEvent,
 } from "../../../plugins/types.js";
 import { isCronSessionKey, isSubagentSessionKey } from "../../../routing/session-key.js";
 import { joinPresentTextSegments } from "../../../shared/text/join-segments.js";
@@ -2384,6 +2386,25 @@ export async function runEmbeddedAttempt(
         );
       }
 
+      const llmInputContextStages: NonNullable<PluginHookLlmInputEvent["contextStages"]> = [];
+      const pushLlmInputContextStage = (
+        stage: NonNullable<PluginHookLlmInputEvent["contextStages"]>[number]["stage"],
+        messages: AgentMessage[],
+      ) => {
+        let estimatedTokens: number | undefined;
+        try {
+          estimatedTokens = messages.reduce((sum, message) => sum + estimateTokens(message), 0);
+        } catch {
+          estimatedTokens = undefined;
+        }
+        llmInputContextStages.push({
+          stage,
+          messages: structuredClone(messages),
+          messageCount: messages.length,
+          estimatedTokens,
+        });
+      };
+
       try {
         const prior = await sanitizeSessionHistory({
           messages: activeSession.messages,
@@ -2396,6 +2417,7 @@ export async function runEmbeddedAttempt(
           sessionId: params.sessionId,
           policy: transcriptPolicy,
         });
+        pushLlmInputContextStage("sanitized", prior);
         cacheTrace?.recordStage("session:sanitized", { messages: prior });
         const validatedGemini = transcriptPolicy.validateGeminiTurns
           ? validateGeminiTurns(prior)
@@ -2403,16 +2425,19 @@ export async function runEmbeddedAttempt(
         const validated = transcriptPolicy.validateAnthropicTurns
           ? validateAnthropicTurns(validatedGemini)
           : validatedGemini;
+        pushLlmInputContextStage("validated", validated);
         const truncated = limitHistoryTurns(
           validated,
           getDmHistoryLimitFromSessionKey(params.sessionKey, params.config),
         );
+        pushLlmInputContextStage("history-limited", truncated);
         // Re-run tool_use/tool_result pairing repair after truncation, since
         // limitHistoryTurns can orphan tool_result blocks by removing the
         // assistant message that contained the matching tool_use.
         const limited = transcriptPolicy.repairToolUseResultPairing
           ? sanitizeToolUseResultPairing(truncated)
           : truncated;
+        pushLlmInputContextStage("tool-pair-repaired", limited);
         cacheTrace?.recordStage("session:limited", { messages: limited });
         if (limited.length > 0) {
           activeSession.agent.replaceMessages(limited);
@@ -2431,6 +2456,7 @@ export async function runEmbeddedAttempt(
             if (assembled.messages !== activeSession.messages) {
               activeSession.agent.replaceMessages(assembled.messages);
             }
+            pushLlmInputContextStage("context-engine-assembled", activeSession.messages);
             if (assembled.systemPromptAddition) {
               systemPromptText = prependSystemPromptAddition({
                 systemPrompt: systemPromptText,
@@ -2758,6 +2784,7 @@ export async function runEmbeddedAttempt(
           if (didPruneImages) {
             activeSession.agent.replaceMessages(activeSession.messages);
           }
+          pushLlmInputContextStage("final", activeSession.messages);
 
           // Detect and load images referenced in the prompt for vision-capable models.
           // Images are prompt-local only (pi-like behavior).
@@ -2812,6 +2839,8 @@ export async function runEmbeddedAttempt(
                   prompt: effectivePrompt,
                   historyMessages: activeSession.messages,
                   imagesCount: imageResult.images.length,
+                  systemPromptReport,
+                  contextStages: llmInputContextStages,
                 },
                 {
                   agentId: hookAgentId,

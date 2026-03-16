@@ -1122,7 +1122,7 @@ export async function runEmbeddedPiAgent(
               if (overflowHookRunner?.hasHooks("before_compaction")) {
                 try {
                   await overflowHookRunner.runBeforeCompaction(
-                    { messageCount: -1, sessionFile: params.sessionFile },
+                    { messageCount: -1, sessionFile: params.sessionFile, messages: undefined },
                     hookCtx,
                   );
                 } catch (hookErr) {
@@ -1205,6 +1205,10 @@ export async function runEmbeddedPiAgent(
                       compactedCount: -1,
                       tokenCount: compactResult.result?.tokensAfter,
                       sessionFile: params.sessionFile,
+                      messages: undefined,
+                      tokensBefore: compactResult.result?.tokensBefore,
+                      summary: compactResult.result?.summary,
+                      firstKeptEntryId: compactResult.result?.firstKeptEntryId,
                     },
                     hookCtx,
                   );

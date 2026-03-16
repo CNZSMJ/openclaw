@@ -931,6 +931,11 @@ export async function compactEmbeddedPiSessionDirect(
               {
                 messageCount: messageCountBefore,
                 tokenCount: tokenCountBefore,
+                originalMessageCount: messageCountOriginal,
+                originalTokenCount: tokenCountOriginal,
+                originalMessages: structuredClone(originalMessages),
+                compactingMessages: structuredClone(session.messages),
+                messages: structuredClone(session.messages),
               },
               {
                 sessionId: params.sessionId,
@@ -1071,6 +1076,10 @@ export async function compactEmbeddedPiSessionDirect(
                 tokenCount: tokensAfter,
                 compactedCount,
                 sessionFile: params.sessionFile,
+                messages: structuredClone(session.messages),
+                tokensBefore: observedTokenCount ?? result.tokensBefore,
+                summary: result.summary,
+                firstKeptEntryId: result.firstKeptEntryId,
               },
               {
                 sessionId: params.sessionId,
@@ -1208,6 +1217,7 @@ export async function compactEmbeddedPiSession(
               {
                 messageCount: -1,
                 sessionFile: params.sessionFile,
+                messages: undefined,
               },
               hookCtx,
             );
@@ -1252,6 +1262,10 @@ export async function compactEmbeddedPiSession(
                 compactedCount: -1,
                 tokenCount: result.result?.tokensAfter,
                 sessionFile: params.sessionFile,
+                messages: undefined,
+                tokensBefore: result.result?.tokensBefore,
+                summary: result.result?.summary,
+                firstKeptEntryId: result.result?.firstKeptEntryId,
               },
               hookCtx,
             );

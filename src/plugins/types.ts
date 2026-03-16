@@ -21,6 +21,7 @@ import type {
   ChannelStructuredComponents,
 } from "../channels/plugins/types.js";
 import type { OpenClawConfig } from "../config/config.js";
+import type { SessionSystemPromptReport } from "../config/sessions/types.js";
 import type { ModelProviderConfig } from "../config/types.js";
 import type { GatewayRequestHandler } from "../gateway/server-methods/types.js";
 import type { InternalHookHandler } from "../hooks/internal-hooks.js";
@@ -1554,6 +1555,19 @@ export type PluginHookLlmInputEvent = {
   prompt: string;
   historyMessages: unknown[];
   imagesCount: number;
+  systemPromptReport?: SessionSystemPromptReport;
+  contextStages?: Array<{
+    stage:
+      | "sanitized"
+      | "validated"
+      | "history-limited"
+      | "tool-pair-repaired"
+      | "context-engine-assembled"
+      | "final";
+    messages: unknown[];
+    messageCount: number;
+    estimatedTokens?: number;
+  }>;
 };
 
 // llm_output hook
@@ -1589,6 +1603,10 @@ export type PluginHookBeforeCompactionEvent = {
   compactingCount?: number;
   tokenCount?: number;
   messages?: unknown[];
+  originalMessageCount?: number;
+  originalTokenCount?: number;
+  originalMessages?: unknown[];
+  compactingMessages?: unknown[];
   /** Path to the session JSONL transcript. All messages are already on disk
    *  before compaction starts, so plugins can read this file asynchronously
    *  and process in parallel with the compaction LLM call. */
@@ -1606,6 +1624,10 @@ export type PluginHookAfterCompactionEvent = {
   messageCount: number;
   tokenCount?: number;
   compactedCount: number;
+  messages?: unknown[];
+  tokensBefore?: number;
+  summary?: string;
+  firstKeptEntryId?: string;
   /** Path to the session JSONL transcript. All pre-compaction messages are
    *  preserved on disk, so plugins can read and process them asynchronously
    *  without blocking the compaction pipeline. */

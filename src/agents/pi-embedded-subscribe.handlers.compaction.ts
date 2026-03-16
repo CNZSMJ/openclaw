@@ -81,6 +81,7 @@ export function handleAutoCompactionEnd(
             messageCount: ctx.params.session.messages?.length ?? 0,
             compactedCount: ctx.getCompactionCount(),
             sessionFile: ctx.params.session.sessionFile,
+            messages: ctx.params.session.messages,
           },
           { sessionKey: ctx.params.sessionKey },
         )

@@ -1,0 +1,53 @@
+{
+  "id": "context-inspector",
+  "name": "Context Inspector",
+  "description": "Observe, analyze, and inspect real model context in a browser.",
+  "uiHints": {
+    "capture.maxRuns": {
+      "label": "Max Stored Runs",
+      "help": "Maximum number of captured runs to retain on disk."
+    },
+    "capture.maxStringChars": {
+      "label": "Max Stored String Chars",
+      "help": "Soft cap for stored string payloads before truncation markers are added."
+    },
+    "security.allowRemoteViewer": {
+      "label": "Allow Remote Viewer",
+      "help": "Allow non-loopback access to the browser UI."
+    }
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "capture": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "maxRuns": {
+            "type": "number",
+            "minimum": 10,
+            "maximum": 5000,
+            "default": 300
+          },
+          "maxStringChars": {
+            "type": "number",
+            "minimum": 1000,
+            "maximum": 1000000,
+            "default": 250000
+          }
+        }
+      },
+      "security": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "allowRemoteViewer": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    }
+  }
+}
