@@ -42,8 +42,8 @@ export function buildContextInspectorHtml(): string {
       color: var(--text);
       font-family: var(--sans);
     }
-    body { padding: 14px; }
-    .app { display: grid; grid-template-columns: 340px 1fr; gap: 18px; min-height: calc(100vh - 48px); }
+    body { padding: 12px; }
+    .app { display: grid; grid-template-columns: 312px 1fr; gap: 14px; min-height: calc(100vh - 40px); }
     .panel {
       background: var(--panel);
       border: 1px solid var(--line);
@@ -52,22 +52,22 @@ export function buildContextInspectorHtml(): string {
       backdrop-filter: blur(24px);
     }
     .sidebar { display: flex; flex-direction: column; overflow: hidden; position: sticky; top: 18px; max-height: calc(100vh - 36px); }
-    .hero { padding: 24px 22px 14px; background: linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0)); }
+    .hero { padding: 20px 20px 10px; background: linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0)); }
     .hero h1 {
       margin: 0;
       font-family: var(--serif);
-      font-size: 30px;
+      font-size: 22px;
       font-weight: 600;
       letter-spacing: -0.03em;
     }
-    .hero p { margin: 10px 0 0; color: var(--muted-strong); line-height: 1.5; font-size: 14px; max-width: 28ch; }
+    .hero p { margin: 8px 0 0; color: var(--muted-strong); line-height: 1.45; font-size: 13px; max-width: 28ch; }
     .hero-guide {
       margin-top: 14px;
       padding: 0;
     }
     .hero-guide strong { display: block; font-size: 12px; margin-bottom: 6px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
     .hero-guide ol { margin: 0; padding-left: 18px; color: var(--muted-strong); font-size: 13px; line-height: 1.5; }
-    .toolbar { display: flex; gap: 8px; padding: 12px 18px 14px; background: transparent; }
+    .toolbar { display: flex; gap: 8px; padding: 10px 16px 12px; background: transparent; }
     .toolbar input {
       width: 100%;
       padding: 12px 14px;
@@ -81,7 +81,7 @@ export function buildContextInspectorHtml(): string {
     .toolbar input::placeholder { color: var(--muted); }
     .runs { overflow: auto; padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 6px; }
     .run-card {
-      padding: 14px 14px 14px 16px;
+      padding: 12px 12px 12px 14px;
       border-radius: 18px;
       border: 0;
       border-left: 3px solid transparent;
@@ -108,17 +108,17 @@ export function buildContextInspectorHtml(): string {
     }
     .badge.warn { background: var(--warn-soft); color: var(--warn); }
     .badge.danger { background: var(--danger-soft); color: var(--danger); }
-    .main { padding: 14px 16px 18px; overflow: auto; }
+    .main { padding: 12px 14px 16px; overflow: auto; }
     .topline {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 12px;
       align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 12px;
+      margin-bottom: 10px;
+      padding-bottom: 10px;
       border-bottom: 1px solid var(--line);
     }
-    .topline h2 { margin: 0; font-size: 24px; font-family: var(--serif); font-weight: 600; letter-spacing: -0.025em; }
+    .topline h2 { margin: 0; font-size: 18px; font-family: var(--serif); font-weight: 600; letter-spacing: -0.025em; }
     .topline p { margin: 4px 0 0; color: var(--muted-strong); font-size: 12px; }
     .actions { display: flex; gap: 10px; flex-wrap: wrap; }
     button {
@@ -126,7 +126,7 @@ export function buildContextInspectorHtml(): string {
       background: rgba(255,255,255,0.9);
       color: var(--text);
       border-radius: 999px;
-      padding: 10px 14px;
+      padding: 8px 12px;
       font-weight: 600;
       font: inherit;
       cursor: pointer;
@@ -139,11 +139,11 @@ export function buildContextInspectorHtml(): string {
     }
     .overview-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
     .overview-card,
-    .stat { padding: 16px; border: 0; border-radius: 22px; background: rgba(255,255,255,0.52); box-shadow: inset 0 0 0 1px rgba(24, 28, 33, 0.05); }
+    .stat { padding: 14px; border: 0; border-radius: 18px; background: rgba(255,255,255,0.52); box-shadow: inset 0 0 0 1px rgba(24, 28, 33, 0.05); }
     .overview-card label,
     .stat label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
     .overview-card strong,
-    .stat strong { display: block; font-size: 21px; line-height: 1.15; }
+    .stat strong { display: block; font-size: 17px; line-height: 1.2; }
     .overview-card p { margin: 8px 0 0; color: var(--muted-strong); font-size: 12px; line-height: 1.4; }
     .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
     .workspace-grid {
@@ -303,11 +303,113 @@ export function buildContextInspectorHtml(): string {
       padding: 8px 12px;
       font-size: 12px;
     }
+    .workflow {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .workflow-tab {
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.9);
+      box-shadow: inset 0 0 0 1px var(--line);
+      color: var(--muted-strong);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+    .workflow-tab.active {
+      background: var(--text);
+      color: #fff;
+      box-shadow: none;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .hero-card {
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.62);
+      box-shadow: inset 0 0 0 1px rgba(24, 28, 33, 0.05);
+    }
+    .hero-card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+    }
+    .hero-card p {
+      margin: 0;
+      color: var(--muted-strong);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .hero-card strong {
+      display: block;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+    .next-steps {
+      display: grid;
+      gap: 10px;
+    }
+    .step-card {
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.52);
+      box-shadow: inset 0 0 0 1px rgba(24, 28, 33, 0.05);
+    }
+    .step-card strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    .step-card p {
+      margin: 0;
+      color: var(--muted-strong);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .section-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+    .single-column {
+      display: grid;
+      gap: 14px;
+    }
+    .guide-callout {
+      margin-bottom: 14px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(11, 107, 114, 0.08);
+      box-shadow: inset 0 0 0 1px rgba(11, 107, 114, 0.1);
+    }
+    .guide-callout strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      letter-spacing: 0.02em;
+    }
+    .guide-callout p {
+      margin: 0;
+      color: var(--muted-strong);
+      font-size: 13px;
+      line-height: 1.45;
+    }
     @media (max-width: 1320px) {
       .overview-grid,
       .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .reading-path { grid-template-columns: 1fr; }
       .workspace-grid { grid-template-columns: 1fr; }
+      .summary-grid,
+      .section-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 900px) {
       body { padding: 14px; }
@@ -342,8 +444,8 @@ export function buildContextInspectorHtml(): string {
       subtitle: document.querySelector("#subtitle"),
     };
 
-    const fmtNumber = new Intl.NumberFormat("en-US");
-    const fmtDate = new Intl.DateTimeFormat(undefined, {
+    const fmtNumber = new Intl.NumberFormat("zh-CN");
+    const fmtDate = new Intl.DateTimeFormat("zh-CN", {
       month: "short",
       day: "numeric",
       hour: "2-digit",
@@ -546,11 +648,11 @@ export function buildContextInspectorHtml(): string {
         chunks
           .map((chunk) => '<strong>' + escapeHtml(chunk.title) + '</strong><p>' + escapeHtml(chunk.body) + '</p>')
           .join("") +
-        '<p>Showing ' +
+        '<p>当前分栏显示 ' +
         escapeHtml(String(filteredCount)) +
-        " of " +
+        " / " +
         escapeHtml(String(totalCount)) +
-        " segments in the current lane.</p></div><button id='clear-focus'>Clear focus</button></div>"
+        " 个片段。</p></div><button id='clear-focus'>清除聚焦</button></div>"
       );
     }
 
@@ -569,8 +671,8 @@ export function buildContextInspectorHtml(): string {
             const active = state.currentRun && state.currentRun.runId === run.runId;
             const badges = [
               '<span class="badge">' + fmtNumber.format(run.estimatedTokens) + ' tok</span>',
-              '<span class="badge' + (run.noiseScore >= 45 ? ' warn' : '') + '">noise ' + run.noiseScore + '</span>',
-              '<span class="badge' + (run.duplicateChars > 8000 ? ' danger' : '') + '">dup ' + fmtNumber.format(run.duplicateChars) + '</span>',
+              '<span class="badge' + (run.noiseScore >= 45 ? ' warn' : '') + '">噪音 ' + run.noiseScore + '</span>',
+              '<span class="badge' + (run.duplicateChars > 8000 ? ' danger' : '') + '">重复 ' + fmtNumber.format(run.duplicateChars) + '</span>',
             ].join("");
             return '<article class="run-card ' + (active ? 'active' : '') + '" data-run-id="' + run.runId + '">' +
               '<h3>' + escapeHtml(run.provider + '/' + run.model) + '</h3>' +
@@ -581,7 +683,7 @@ export function buildContextInspectorHtml(): string {
               '<div class="run-badges">' + badges + '</div>' +
             '</article>';
           }).join("")
-        : '<div class="empty">No captured runs yet. Trigger an agent run, then refresh.</div>';
+        : '<div class="empty">还没有采集到运行记录。先触发一次 agent 运行，再刷新这里。</div>';
 
       for (const card of el.runs.querySelectorAll(".run-card")) {
         card.addEventListener("click", () => loadRun(card.getAttribute("data-run-id")));
@@ -590,15 +692,15 @@ export function buildContextInspectorHtml(): string {
 
     function renderContent() {
       if (!state.currentRun) {
-        el.heading.textContent = "Context workbench";
-        el.subtitle.textContent = "Pick a run to inspect real model inputs, prompt noise, duplication, and execution timeline.";
+        el.heading.textContent = "上下文工作台";
+        el.subtitle.textContent = "先从左侧选择一次运行，再查看真实送模内容、噪音、重复和执行过程。";
         el.content.innerHTML = [
           '<section class="reading-path">',
-            pathStep("1. Pick the noisiest run", "Start from the left list. Prioritize high noise score, large duplicate chars, or unusually high token cost."),
-            pathStep("2. Read the top drivers", "Focus first on Source map, Cut first, and Prompt pipeline stages. Those three explain most bloat."),
-            pathStep("3. Inspect the exact text", "Only after that, open Context lanes and read the concrete system or history segments that caused the issue."),
+            pathStep("1. 先挑一条最贵的运行", "优先看噪音分高、重复字符多、token 开销异常大的那条。"),
+            pathStep("2. 先看来源和切削点", "先读来源地图、优先裁剪和阶段变化，这三块最能解释为什么上下文会变大。"),
+            pathStep("3. 最后再看原始文本", "确定问题区域后，再进入上下文分栏读 system、prompt、history 的具体内容。"),
           '</section>',
-          '<div class="empty">Select a run from the left. The first live capture becomes your ground truth view of context.</div>',
+          '<div class="empty">从左侧选一条运行记录。第一条真实采集结果就是你分析上下文的基准视图。</div>',
         ].join("");
         return;
       }
@@ -607,9 +709,9 @@ export function buildContextInspectorHtml(): string {
       el.subtitle.textContent = (run.sessionKey || run.runId) + " · " + fmtDate.format(new Date(run.startedAt));
 
       const tabs = [
-        ["system", "System"],
-        ["prompt", "Prompt"],
-        ["history", "History"],
+        ["system", "系统"],
+        ["prompt", "提示词"],
+        ["history", "历史"],
       ];
       const tabHtml = tabs.map(([key, label]) =>
         '<button class="tab ' + (state.activeTab === key ? 'active' : '') + '" data-tab="' + key + '">' + label + '</button>'
@@ -645,24 +747,24 @@ export function buildContextInspectorHtml(): string {
         return '<div class="tree-item clickable ' + (state.selectedOriginKey === originKey ? 'active' : '') + '" data-origin-key="' + escapeHtml(originKey) + '">' +
           '<strong>' + escapeHtml(origin.label) + '</strong>' +
           '<small>' + escapeHtml(origin.kind + (origin.path ? ' · ' + origin.path : '')) + '</small>' +
-          '<small>' + fmtNumber.format(origin.chars) + ' chars · ' + fmtNumber.format(origin.estimatedTokens) + ' tok' + (origin.truncated ? ' · truncated' : '') + '</small>' +
+          '<small>' + fmtNumber.format(origin.chars) + ' 字符 · ' + fmtNumber.format(origin.estimatedTokens) + ' tok' + (origin.truncated ? ' · 已截断' : '') + '</small>' +
           renderOriginDetails(origin) +
         '</div>';
       }).join("");
       const workspaceFiles = ((run.input.report && run.input.report.injectedWorkspaceFiles) || []).map((file) =>
         '<div class="tree-item">' +
           '<strong>' + escapeHtml(file.name || "workspace file") + '</strong>' +
-          '<small>' + escapeHtml((file.path || "") + (file.missing ? " · missing" : "")) + '</small>' +
-          '<small>raw ' + fmtNumber.format(file.rawChars || 0) + ' · injected ' + fmtNumber.format(file.injectedChars || 0) + (file.truncated ? ' · truncated' : '') + '</small>' +
+          '<small>' + escapeHtml((file.path || "") + (file.missing ? " · 缺失" : "")) + '</small>' +
+          '<small>原始 ' + fmtNumber.format(file.rawChars || 0) + ' · 注入 ' + fmtNumber.format(file.injectedChars || 0) + (file.truncated ? ' · 已截断' : '') + '</small>' +
         '</div>'
       ).join("");
       const suggestions = (run.input.suggestions || []).map((item) =>
         '<div class="tree-item">' +
-          '<div class="pill-row"><span class="badge ' + (item.severity === "danger" ? "danger" : item.severity === "warn" ? "warn" : "") + '">' + escapeHtml(item.severity) + '</span></div>' +
+          '<div class="pill-row"><span class="badge ' + (item.severity === "danger" ? "danger" : item.severity === "warn" ? "warn" : "") + '">' + escapeHtml(item.severity === "danger" ? "高" : item.severity === "warn" ? "中" : "低") + '</span></div>' +
           '<strong>' + escapeHtml(item.title) + '</strong>' +
           '<small>' + escapeHtml(item.detail) + '</small>' +
-          (item.evidence ? '<small>Evidence: ' + escapeHtml(item.evidence) + '</small>' : '') +
-          (item.action ? '<small>Action: ' + escapeHtml(item.action) + '</small>' : '') +
+          (item.evidence ? '<small>证据：' + escapeHtml(item.evidence) + '</small>' : '') +
+          (item.action ? '<small>建议动作：' + escapeHtml(item.action) + '</small>' : '') +
         '</div>'
       ).join("");
       const cutItems = [...(run.input.cutFirst || [])];
@@ -677,10 +779,10 @@ export function buildContextInspectorHtml(): string {
       );
       const cutFilters = renderFilterChips(
         [
-          ["all", "All", cutCounts.all],
-          ["bootstrap", "Bootstrap", cutCounts.bootstrap],
-          ["history", "History", cutCounts.history],
-          ["tools", "Tools", cutCounts.tools],
+          ["all", "全部", cutCounts.all],
+          ["bootstrap", "静态注入", cutCounts.bootstrap],
+          ["history", "历史", cutCounts.history],
+          ["tools", "工具", cutCounts.tools],
         ],
         state.cutFilter,
       );
@@ -688,9 +790,9 @@ export function buildContextInspectorHtml(): string {
         '<div class="tree-item clickable" data-cut-kind="' + escapeHtml(item.kind || "") + '" data-cut-path="' + escapeHtml(item.path || "") + '" data-cut-label="' + escapeHtml(item.title || "") + '">' +
           '<strong>' + escapeHtml((index + 1) + ". " + item.title) + '</strong>' +
           '<small>' + escapeHtml(item.kind + (item.path ? ' · ' + item.path : '')) + '</small>' +
-          '<small>' + fmtNumber.format(item.chars) + ' chars · ' + fmtNumber.format(item.estimatedTokens) + ' tok</small>' +
+          '<small>' + fmtNumber.format(item.chars) + ' 字符 · ' + fmtNumber.format(item.estimatedTokens) + ' tok</small>' +
           '<small>' + escapeHtml(item.reason) + '</small>' +
-          '<small>Action: ' + escapeHtml(item.action) + '</small>' +
+          '<small>建议动作：' + escapeHtml(item.action) + '</small>' +
         '</div>'
       ).join("");
 
@@ -703,87 +805,87 @@ export function buildContextInspectorHtml(): string {
         '</div>'
       ).join("");
       const stageLabels = {
-        "sanitized": "Sanitized",
-        "validated": "Provider turn validation",
-        "history-limited": "History limit applied",
-        "tool-pair-repaired": "Tool pairing repaired",
-        "context-engine-assembled": "Context engine assembled",
-        "final": "Final pre-prompt snapshot",
+        "sanitized": "清洗后",
+        "validated": "Provider 校验后",
+        "history-limited": "历史裁剪后",
+        "tool-pair-repaired": "工具配对修复后",
+        "context-engine-assembled": "上下文组装后",
+        "final": "最终送模前快照",
       };
       const contextStages = (run.input.contextStages || []).map((stage) =>
         '<div class="tree-item clickable ' + (state.selectedStage === stage.stage ? 'active' : '') + '" data-stage="' + escapeHtml(stage.stage) + '">' +
           '<strong>' + escapeHtml(stageLabels[stage.stage] || stage.stage) + '</strong>' +
-          '<small>' + fmtNumber.format(stage.messageCount) + ' messages · ' + fmtNumber.format(stage.chars) + ' chars · ' + fmtNumber.format(stage.estimatedTokens || 0) + ' tok</small>' +
-          '<small>duplicate ' + fmtNumber.format(stage.duplicateChars) + '</small>' +
+          '<small>' + fmtNumber.format(stage.messageCount) + ' 条消息 · ' + fmtNumber.format(stage.chars) + ' 字符 · ' + fmtNumber.format(stage.estimatedTokens || 0) + ' tok</small>' +
+          '<small>重复 ' + fmtNumber.format(stage.duplicateChars) + '</small>' +
           '<div class="pill-row">' + renderStageBadges(stage) + '</div>' +
         '</div>'
       ).join("");
 
       const diff = state.currentDiff
         ? '<div class="diff">' +
-            '<div class="metric-line"><span>Chars delta</span><strong>' + prettyDelta(state.currentDiff.metrics.charsDelta) + '</strong></div>' +
-            '<div class="metric-line"><span>Token delta</span><strong>' + prettyDelta(state.currentDiff.metrics.tokenDelta) + '</strong></div>' +
-            '<div class="metric-line"><span>Noise delta</span><strong>' + prettyDelta(state.currentDiff.metrics.noiseDelta) + '</strong></div>' +
-            '<div class="metric-line"><span>Duplicate delta</span><strong>' + prettyDelta(state.currentDiff.metrics.duplicateDelta) + '</strong></div>' +
-            '<pre>' + escapeHtml(state.currentDiff.base ? ('Base run: ' + state.currentDiff.base.runId + '\\nSession: ' + (state.currentDiff.base.sessionKey || 'n/a')) : 'No previous comparable run found.') + '</pre>' +
+            '<div class="metric-line"><span>字符变化</span><strong>' + prettyDelta(state.currentDiff.metrics.charsDelta) + '</strong></div>' +
+            '<div class="metric-line"><span>Token 变化</span><strong>' + prettyDelta(state.currentDiff.metrics.tokenDelta) + '</strong></div>' +
+            '<div class="metric-line"><span>噪音变化</span><strong>' + prettyDelta(state.currentDiff.metrics.noiseDelta) + '</strong></div>' +
+            '<div class="metric-line"><span>重复变化</span><strong>' + prettyDelta(state.currentDiff.metrics.duplicateDelta) + '</strong></div>' +
+            '<pre>' + escapeHtml(state.currentDiff.base ? ('对比基线：' + state.currentDiff.base.runId + '\\n会话：' + (state.currentDiff.base.sessionKey || 'n/a')) : '没有找到同会话中的上一条可对比运行。') + '</pre>' +
           '</div>'
-        : '<div class="muted">Load a run to compute diff against the prior run in the same session.</div>';
+        : '<div class="muted">先选中一条运行，再和同会话里的上一条运行做对比。</div>';
 
       const thinking = ((run.output && run.output.thinkingTexts) || []).length
-        ? run.output.thinkingTexts.map((text, index) => '<article class="segment"><strong>Thinking ' + (index + 1) + '</strong><pre>' + escapeHtml(text) + '</pre></article>').join("")
-        : '<div class="muted">No visible thinking blocks were exposed by the provider for this run.</div>';
+        ? run.output.thinkingTexts.map((text, index) => '<article class="segment"><strong>思考 ' + (index + 1) + '</strong><pre>' + escapeHtml(text) + '</pre></article>').join("")
+        : '<div class="muted">这次运行没有暴露可见的 thinking / reasoning 内容。</div>';
 
       const topOrigin = (run.input.origins || [])[0];
       const topCut = (run.input.cutFirst || [])[0];
       const worstStage = [...(run.input.contextStages || [])].sort((a, b) => Math.abs((b.charsDelta || 0)) - Math.abs((a.charsDelta || 0)))[0];
       const laneSummary = [
-        '<span class="badge">system ' + fmtNumber.format(run.input.systemChars || 0) + ' chars</span>',
-        '<span class="badge">prompt ' + fmtNumber.format(run.input.promptChars || 0) + ' chars</span>',
-        '<span class="badge">history ' + fmtNumber.format(run.input.historyChars || 0) + ' chars</span>',
+        '<span class="badge">system ' + fmtNumber.format(run.input.systemChars || 0) + ' 字符</span>',
+        '<span class="badge">prompt ' + fmtNumber.format(run.input.promptChars || 0) + ' 字符</span>',
+        '<span class="badge">history ' + fmtNumber.format(run.input.historyChars || 0) + ' 字符</span>',
       ].join("");
 
       el.content.innerHTML = [
         '<section class="topline">',
           '<div><h2>' + escapeHtml(run.provider + '/' + run.model) + '</h2><p>' + escapeHtml(run.sessionKey || run.runId) + '</p></div>',
-          '<div class="actions"><button class="primary" id="copy-json">Copy run JSON</button><button id="reload-diff">Refresh diff</button></div>',
+          '<div class="actions"><button class="primary" id="copy-json">复制运行 JSON</button><button id="reload-diff">刷新对比</button></div>',
         '</section>',
         '<section class="overview-grid">',
-          overviewCard("Start here", "Source map -> Cut first -> Context lanes", "Read the biggest source first, then the best cut, then the raw context."),
-          overviewCard("Biggest source", topOrigin ? (topOrigin.label + " · " + fmtNumber.format(topOrigin.chars) + " chars") : "No origin data", topOrigin ? (topOrigin.kind + (topOrigin.path ? " · " + topOrigin.path : "")) : "This run did not expose origin attribution."),
-          overviewCard("Best cut", topCut ? (topCut.title + " · " + fmtNumber.format(topCut.chars) + " chars") : "No obvious cut", topCut ? topCut.reason : "No high-yield cut candidate was detected."),
-          overviewCard("Largest stage delta", worstStage ? ((stageLabels[worstStage.stage] || worstStage.stage) + " · " + prettyDelta(worstStage.charsDelta || 0) + " chars") : "No stage data", worstStage ? "This is the step where the prompt changed most." : "Stage snapshots were not available for this run."),
+          overviewCard("建议顺序", "来源地图 -> 优先裁剪 -> 上下文分栏", "先看最大来源，再看最高收益裁剪项，最后再读原始文本。"),
+          overviewCard("最大来源", topOrigin ? (topOrigin.label + " · " + fmtNumber.format(topOrigin.chars) + " 字符") : "没有来源数据", topOrigin ? (topOrigin.kind + (topOrigin.path ? " · " + topOrigin.path : "")) : "这次运行没有暴露来源归因信息。"),
+          overviewCard("最优先裁剪", topCut ? (topCut.title + " · " + fmtNumber.format(topCut.chars) + " 字符") : "没有明显裁剪点", topCut ? topCut.reason : "当前没有识别到高收益的裁剪候选项。"),
+          overviewCard("变化最大阶段", worstStage ? ((stageLabels[worstStage.stage] || worstStage.stage) + " · " + prettyDelta(worstStage.charsDelta || 0) + " 字符") : "没有阶段数据", worstStage ? "这是上下文变化最大的步骤。" : "这次运行没有采到阶段快照。"),
         '</section>',
         '<section class="stats">',
-          stat("Context size", fmtNumber.format(run.input.chars) + " chars"),
-          stat("Estimated tokens", fmtNumber.format(run.input.estimatedTokens)),
-          stat("Noise score", String(run.input.noiseScore)),
-          stat("Duplicate chars", fmtNumber.format(run.input.duplicateChars)),
+          stat("上下文大小", fmtNumber.format(run.input.chars) + " 字符"),
+          stat("估算 Token", fmtNumber.format(run.input.estimatedTokens)),
+          stat("噪音分", String(run.input.noiseScore)),
+          stat("重复字符", fmtNumber.format(run.input.duplicateChars)),
         '</section>',
         '<section class="reading-path">',
-          pathStep("Where to start", "Open Source map and Cut first first. They show the largest sources and the highest-yield reductions."),
-          pathStep("Where it grew", "Use Prompt pipeline stages to see whether history limiting, assembly, or repair steps caused the jump."),
-          pathStep("What the model saw", "Switch Context lanes to system, prompt, and history only after you know which block deserves attention."),
+          pathStep("先看哪里", "先看来源地图和优先裁剪，它们会告诉你钱花在了哪里。"),
+          pathStep("在哪里变大", "再看阶段变化，确认是历史裁剪、上下文组装还是修复步骤让它膨胀。"),
+          pathStep("模型真正看到了什么", "最后进入上下文分栏，只读你已经确认过最可疑的区域。"),
         '</section>',
         '<section class="workspace-grid">',
-          '<div class="workspace-column"><div class="workspace-title">Sources and pipeline</div><div class="stack">',
-            card("Source map", "Largest sources first. This tells you what is paying for the prompt.", '<div class="tree">' + origins + '</div>'),
-            card("Injected workspace files", "Check truncation and injected size before digging into file content.", workspaceFiles || '<div class="muted">No injected workspace files were detected for this run.</div>'),
-            card("Prompt pipeline stages", "Use deltas to find the exact step that inflated or reduced the prompt.", contextStages || '<div class="muted">Stage snapshots were not available for this run.</div>'),
-            card("Approx diff", "Compare this run against the previous comparable run in the same session.", diff),
+          '<div class="workspace-column"><div class="workspace-title">来源与阶段</div><div class="stack">',
+            card("来源地图", "按体积从大到小排序。这里决定了 prompt 的主要成本。", '<div class="tree">' + origins + '</div>'),
+            card("注入的工作区文件", "先看是否被截断、实际注入了多少，再决定要不要深入读文件内容。", workspaceFiles || '<div class="muted">这次运行没有检测到注入的工作区文件。</div>'),
+            card("Prompt 阶段变化", "用 delta 找出上下文在哪一步变大或变小。", contextStages || '<div class="muted">这次运行没有采到阶段快照。</div>'),
+            card("近似对比", "和同一会话中的上一条可比运行做对照。", diff),
           '</div></div>',
-          '<div class="workspace-column"><div class="workspace-title">Prompt payload</div><div class="stack">',
-            card("Context lanes", "This is the exact text sent to the model. Read only after you know which lane is expensive.", renderFocusBar(run, filteredSegments.length, segments.length) + '<div class="lane-summary">' + laneSummary + '</div><div class="tabs">' + tabHtml + '</div><div class="segments">' + segmentHtml + '</div>'),
+          '<div class="workspace-column"><div class="workspace-title">真实送模内容</div><div class="stack">',
+            card("上下文分栏", "这里是最终送给模型的真实文本。先确认问题区域，再来读这一栏。", renderFocusBar(run, filteredSegments.length, segments.length) + '<div class="lane-summary">' + laneSummary + '</div><div class="tabs">' + tabHtml + '</div><div class="segments">' + segmentHtml + '</div>'),
           '</div></div>',
-          '<div class="workspace-column"><div class="workspace-title">Actions and runtime</div><div class="stack">',
+          '<div class="workspace-column"><div class="workspace-title">动作与运行过程</div><div class="stack">',
             card(
-              "Cut first",
-              "Highest-yield reductions, grouped by source type.",
+              "优先裁剪",
+              "按来源类型分组的最高收益削减项。",
               cutFilters +
-                (cutFirst || '<div class="muted">No obvious high-yield cuts detected for this filter.</div>'),
+                (cutFirst || '<div class="muted">当前筛选条件下没有明显的高收益削减项。</div>'),
             ),
-            card("Optimization suggestions", "Actionable next steps based on stage deltas, duplication, and source mix.", suggestions || '<div class="muted">No suggestions available.</div>'),
-            card("Execution timeline", "Run-level events, tool calls, and compaction checkpoints.", '<div class="timeline">' + timeline + '</div>'),
-            card("Visible thinking", "Only provider-exposed reasoning appears here.", thinking),
+            card("优化建议", "基于阶段变化、重复率和来源结构生成的下一步建议。", suggestions || '<div class="muted">当前没有生成建议。</div>'),
+            card("执行时间线", "运行级事件、工具调用和 compaction 检查点。", '<div class="timeline">' + timeline + '</div>'),
+            card("可见思考", "这里只展示 provider 明确暴露出来的 reasoning / thinking。", thinking),
           '</div></div>',
         '</section>',
       ].join("");
@@ -919,7 +1021,7 @@ export function buildContextInspectorHtml(): string {
       renderContent();
     });
     refresh().catch((error) => {
-      el.content.innerHTML = '<div class="empty">Failed to load runs: ' + escapeHtml(String(error)) + '</div>';
+      el.content.innerHTML = '<div class="empty">加载运行记录失败：' + escapeHtml(String(error)) + '</div>';
     });
   `;
 
@@ -928,38 +1030,38 @@ export function buildContextInspectorHtml(): string {
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width,initial-scale=1" />
-      <title>Context Inspector</title>
+      <title>上下文分析台</title>
       <style>${css}</style>
     </head>
     <body>
       <div class="app">
         <aside class="panel sidebar">
           <section class="hero">
-            <h1>Context Inspector</h1>
-            <p>Real model inputs, provenance, prompt noise, duplication, diff, and execution flow in one browser workbench.</p>
+            <h1>上下文分析台</h1>
+            <p>在一个浏览器工作台里查看真实送模内容、来源归因、Prompt 噪音、重复信息、差异和执行过程。</p>
             <div class="hero-guide">
-              <strong>Suggested reading order</strong>
+              <strong>建议阅读顺序</strong>
               <ol>
-                <li>Pick a high-noise run.</li>
-                <li>Read Source map and Cut first.</li>
-                <li>Open Context lanes last.</li>
+                <li>先挑一条噪音高的运行。</li>
+                <li>先看来源地图和优先裁剪。</li>
+                <li>最后再打开上下文分栏。</li>
               </ol>
             </div>
           </section>
           <section class="toolbar">
-            <input id="search" type="search" placeholder="Search runs, sessions, providers" />
+            <input id="search" type="search" placeholder="搜索运行、会话、模型或 provider" />
           </section>
           <section class="runs" id="runs"></section>
         </aside>
         <main class="panel main">
           <section class="topline">
             <div>
-              <h2 id="heading">Context workbench</h2>
-              <p id="subtitle">Select a run to inspect live context.</p>
+              <h2 id="heading">上下文工作台</h2>
+              <p id="subtitle">先选择一条运行记录，再进入分析。</p>
             </div>
             <div class="actions">
-              <button id="refresh" class="primary">Refresh runs</button>
-              <button id="compare">Refresh diff</button>
+              <button id="refresh" class="primary">刷新运行</button>
+              <button id="compare">刷新对比</button>
             </div>
           </section>
           <section id="content"></section>

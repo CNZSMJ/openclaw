@@ -260,6 +260,8 @@ importers:
   extensions/cloudflare-ai-gateway: {}
   extensions/context-inspector: {}
 
+  extensions/context-inspector: {}
+
   extensions/copilot-proxy: {}
 
   extensions/diagnostics-otel:

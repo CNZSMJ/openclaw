@@ -137,6 +137,7 @@ describe("ContextInspectorStore", () => {
         sessionKey: "agent:default:main",
       },
     );
+    await store.flushForTesting();
 
     const run = await store.getRun("run-1");
     expect(run?.status).toBe("complete");
