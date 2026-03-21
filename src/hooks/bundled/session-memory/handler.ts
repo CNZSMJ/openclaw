@@ -12,6 +12,7 @@ import {
   resolveAgentIdByWorkspacePath,
   resolveAgentWorkspaceDir,
 } from "../../../agents/agent-scope.js";
+import { normalizeTimestamp } from "../../../agents/date-time.js";
 import type { OpenClawConfig } from "../../../config/config.js";
 import { resolveStateDir } from "../../../config/paths.js";
 import {
@@ -32,6 +33,11 @@ import type { HookHandler } from "../../hooks.js";
 import { generateSlugViaLLM } from "../../llm-slug-generator.js";
 
 const log = createSubsystemLogger("hooks/session-memory");
+
+type SessionTranscriptExcerpt = {
+  content: string | null;
+  lastMessageTimestampMs?: number;
+};
 
 function resolveDisplaySessionKey(params: {
   cfg?: OpenClawConfig;
@@ -58,13 +64,14 @@ function resolveDisplaySessionKey(params: {
 async function getRecentSessionContent(
   sessionFilePath: string,
   messageCount: number = 15,
-): Promise<string | null> {
+): Promise<SessionTranscriptExcerpt> {
   try {
     const content = await fs.readFile(sessionFilePath, "utf-8");
     const lines = content.trim().split("\n");
 
     // Parse JSONL and extract user/assistant messages first
     const allMessages: string[] = [];
+    let lastMessageTimestampMs: number | undefined;
     for (const line of lines) {
       try {
         const entry = JSON.parse(line);
@@ -83,6 +90,10 @@ async function getRecentSessionContent(
               : msg.content;
             if (text && !text.startsWith("/")) {
               allMessages.push(`${role}: ${text}`);
+              const normalizedTimestamp = normalizeTimestamp(entry.timestamp ?? msg.timestamp);
+              if (normalizedTimestamp) {
+                lastMessageTimestampMs = normalizedTimestamp.timestampMs;
+              }
             }
           }
         }
@@ -93,9 +104,12 @@ async function getRecentSessionContent(
 
     // Then slice to get exactly messageCount messages
     const recentMessages = allMessages.slice(-messageCount);
-    return recentMessages.join("\n");
+    return {
+      content: recentMessages.length > 0 ? recentMessages.join("\n") : null,
+      lastMessageTimestampMs,
+    };
   } catch {
-    return null;
+    return { content: null };
   }
 }
 
@@ -106,9 +120,9 @@ async function getRecentSessionContent(
 async function getRecentSessionContentWithResetFallback(
   sessionFilePath: string,
   messageCount: number = 15,
-): Promise<string | null> {
+): Promise<SessionTranscriptExcerpt> {
   const primary = await getRecentSessionContent(sessionFilePath, messageCount);
-  if (primary) {
+  if (primary.content) {
     return primary;
   }
 
@@ -126,14 +140,14 @@ async function getRecentSessionContentWithResetFallback(
     const latestResetPath = path.join(dir, resetCandidates[resetCandidates.length - 1]);
     const fallback = await getRecentSessionContent(latestResetPath, messageCount);
 
-    if (fallback) {
+    if (fallback.content) {
       log.debug("Loaded session content from reset fallback", {
         sessionFilePath,
         latestResetPath,
       });
     }
 
-    return fallback || primary;
+    return fallback.content ? fallback : primary;
   } catch {
     return primary;
   }
@@ -271,13 +285,6 @@ const saveSessionToMemory: HookHandler = async (event) => {
 
     const sessionFile = currentSessionFile || undefined;
     const eventTimestampMs = event.timestamp.getTime();
-    const sessionTimestampMs =
-      typeof sessionEntry.updatedAt === "number" && Number.isFinite(sessionEntry.updatedAt)
-        ? Math.floor(sessionEntry.updatedAt)
-        : eventTimestampMs;
-    const dateStr = formatHumanDayKey(sessionTimestampMs, cfg);
-    const timeStr = formatHumanTime(sessionTimestampMs, cfg, { includeSeconds: true });
-    const timeZone = resolveHumanTimezone(cfg);
 
     // Read message count from hook config (default: 15)
     const hookConfig = resolveHookConfig(cfg, "session-memory");
@@ -288,10 +295,16 @@ const saveSessionToMemory: HookHandler = async (event) => {
 
     let slug: string | null = null;
     let sessionContent: string | null = null;
+    let lastMessageTimestampMs: number | undefined;
 
     if (sessionFile) {
       // Get recent conversation content, with fallback to rotated reset transcript.
-      sessionContent = await getRecentSessionContentWithResetFallback(sessionFile, messageCount);
+      const transcriptExcerpt = await getRecentSessionContentWithResetFallback(
+        sessionFile,
+        messageCount,
+      );
+      sessionContent = transcriptExcerpt.content;
+      lastMessageTimestampMs = transcriptExcerpt.lastMessageTimestampMs;
       log.debug("Session content loaded", {
         length: sessionContent?.length ?? 0,
         messageCount,
@@ -312,6 +325,15 @@ const saveSessionToMemory: HookHandler = async (event) => {
         log.debug("Generated slug", { slug });
       }
     }
+
+    const sessionTimestampMs =
+      lastMessageTimestampMs ??
+      (typeof sessionEntry.updatedAt === "number" && Number.isFinite(sessionEntry.updatedAt)
+        ? Math.floor(sessionEntry.updatedAt)
+        : eventTimestampMs);
+    const dateStr = formatHumanDayKey(sessionTimestampMs, cfg);
+    const timeStr = formatHumanTime(sessionTimestampMs, cfg, { includeSeconds: true });
+    const timeZone = resolveHumanTimezone(cfg);
 
     // If no slug, use timestamp
     if (!slug) {
