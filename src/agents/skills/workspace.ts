@@ -35,23 +35,16 @@ const skillsLogger = createSubsystemLogger("skills");
 const skillCommandDebugOnce = new Set<string>();
 
 /**
- * Replace the user's home directory prefix with `~` in skill file paths
- * to reduce system prompt token usage. Models understand `~` expansion,
- * and the read tool resolves `~` to the home directory.
+ * Keep skill prompt paths explicit.
  *
- * Example: `/Users/alice/.bun/.../skills/github/SKILL.md`
- *       → `~/.bun/.../skills/github/SKILL.md`
- *
- * Saves ~5–6 tokens per skill path × N skills ≈ 400–600 tokens total.
+ * We previously compacted home-prefixed skill paths into `~/...` to save prompt
+ * tokens. In practice that created path collisions with real workspace roots
+ * such as `~/.openclaw/workspace`, and some models incorrectly generalized
+ * skill repo paths like `~/workspace/.../skills/...` into fake workspace file
+ * paths like `~/workspace/memory/...`.
  */
 function compactSkillPaths(skills: Skill[]): Skill[] {
-  const home = os.homedir();
-  if (!home) return skills;
-  const prefix = home.endsWith(path.sep) ? home : home + path.sep;
-  return skills.map((s) => ({
-    ...s,
-    filePath: s.filePath.startsWith(prefix) ? "~/" + s.filePath.slice(prefix.length) : s.filePath,
-  }));
+  return skills.map((skill) => ({ ...skill }));
 }
 
 function debugSkillCommandOnce(
