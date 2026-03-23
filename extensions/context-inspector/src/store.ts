@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { jsonUtf8Bytes } from "../../../src/infra/json-utf8-bytes.js";
+import type { PluginLogger } from "openclaw/plugin-sdk/core";
 import type {
   PluginHookAfterCompactionEvent,
   PluginHookAfterToolCallEvent,
@@ -10,8 +10,7 @@ import type {
   PluginHookBeforeToolCallEvent,
   PluginHookLlmInputEvent,
   PluginHookLlmOutputEvent,
-  PluginLogger,
-} from "../../../src/plugins/types.js";
+} from "openclaw/plugin-sdk/hooks";
 import {
   applyAttentionProxy,
   buildBootstrapSectionOrigins,
@@ -89,6 +88,14 @@ const MAX_DIRTY_RUNS_BEFORE_DEGRADE = 48;
 const MAX_BACKGROUND_TASKS_BEFORE_DEGRADE = 16;
 const FLUSH_DEBOUNCE_MS = 180;
 const MAX_FLUSH_BATCH_SIZE = 24;
+
+function jsonUtf8Bytes(value: unknown): number {
+  try {
+    return Buffer.byteLength(JSON.stringify(value), "utf8");
+  } catch {
+    return Buffer.byteLength(String(value), "utf8");
+  }
+}
 
 function ensureDir(dir: string) {
   fs.mkdirSync(dir, { recursive: true });

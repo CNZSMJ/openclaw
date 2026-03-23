@@ -1,5 +1,5 @@
 import type { AgentMessage } from "@mariozechner/pi-agent-core";
-import { redactSensitiveText } from "../../../src/logging/redact.js";
+import { redactSensitiveText } from "openclaw/plugin-sdk/diagnostics-otel";
 import type {
   ContextStageRecord,
   InspectorOrigin,
