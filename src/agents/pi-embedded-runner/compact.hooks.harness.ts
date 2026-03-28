@@ -47,6 +47,10 @@ export const sessionCompactImpl = vi.fn(async () => ({
   details: { ok: true },
 }));
 export const triggerInternalHook: Mock<(event?: unknown) => void> = vi.fn();
+export const prepareProviderRuntimeAuthMock = vi.fn(async () => undefined);
+export const resolveProviderStreamFnMock = vi.fn((params?: { provider?: string }) =>
+  params?.provider === "ollama" ? (vi.fn(async () => undefined) as unknown) : undefined,
+);
 export const sanitizeSessionHistoryMock = vi.fn(
   async (params: { messages: unknown[] }) => params.messages,
 );
@@ -81,6 +85,48 @@ export const sessionMessages: unknown[] = [
 ];
 export const sessionAbortCompactionMock: Mock<(reason?: unknown) => void> = vi.fn();
 export const createOpenClawCodingToolsMock = vi.fn(() => []);
+
+export function resetCompactSessionStateMocks(): void {
+  sanitizeSessionHistoryMock.mockReset();
+  sanitizeSessionHistoryMock.mockImplementation(async (params: { messages: unknown[] }) => {
+    return params.messages;
+  });
+
+  getMemorySearchManagerMock.mockReset();
+  getMemorySearchManagerMock.mockResolvedValue({
+    manager: {
+      sync: vi.fn(async () => {}),
+    },
+  });
+  resolveMemorySearchConfigMock.mockReset();
+  resolveMemorySearchConfigMock.mockReturnValue({
+    sources: ["sessions"],
+    sync: {
+      sessions: {
+        postCompactionForce: true,
+      },
+    },
+  });
+  resolveSessionAgentIdMock.mockReset();
+  resolveSessionAgentIdMock.mockReturnValue("main");
+  estimateTokensMock.mockReset();
+  estimateTokensMock.mockReturnValue(10);
+  sessionMessages.splice(
+    0,
+    sessionMessages.length,
+    { role: "user", content: "hello", timestamp: 1 },
+    { role: "assistant", content: [{ type: "text", text: "hi" }], timestamp: 2 },
+    {
+      role: "toolResult",
+      toolCallId: "t1",
+      toolName: "exec",
+      content: [{ type: "text", text: "output" }],
+      isError: false,
+      timestamp: 3,
+    },
+  );
+  sessionAbortCompactionMock.mockReset();
+}
 
 export function resetCompactHooksHarnessMocks(): void {
   hookRunner.hasHooks.mockReset();
@@ -122,45 +168,13 @@ export function resetCompactHooksHarnessMocks(): void {
   });
 
   triggerInternalHook.mockReset();
-  sanitizeSessionHistoryMock.mockReset();
-  sanitizeSessionHistoryMock.mockImplementation(async (params: { messages: unknown[] }) => {
-    return params.messages;
-  });
-
-  getMemorySearchManagerMock.mockReset();
-  getMemorySearchManagerMock.mockResolvedValue({
-    manager: {
-      sync: vi.fn(async () => {}),
-    },
-  });
-  resolveMemorySearchConfigMock.mockReset();
-  resolveMemorySearchConfigMock.mockReturnValue({
-    sources: ["sessions"],
-    sync: {
-      sessions: {
-        postCompactionForce: true,
-      },
-    },
-  });
-  resolveSessionAgentIdMock.mockReset();
-  resolveSessionAgentIdMock.mockReturnValue("main");
-  estimateTokensMock.mockReset();
-  estimateTokensMock.mockReturnValue(10);
-  sessionMessages.splice(
-    0,
-    sessionMessages.length,
-    { role: "user", content: "hello", timestamp: 1 },
-    { role: "assistant", content: [{ type: "text", text: "hi" }], timestamp: 2 },
-    {
-      role: "toolResult",
-      toolCallId: "t1",
-      toolName: "exec",
-      content: [{ type: "text", text: "output" }],
-      isError: false,
-      timestamp: 3,
-    },
+  prepareProviderRuntimeAuthMock.mockReset();
+  prepareProviderRuntimeAuthMock.mockResolvedValue(undefined);
+  resolveProviderStreamFnMock.mockReset();
+  resolveProviderStreamFnMock.mockImplementation((params?: { provider?: string }) =>
+    params?.provider === "ollama" ? (vi.fn(async () => undefined) as unknown) : undefined,
   );
-  sessionAbortCompactionMock.mockReset();
+  resetCompactSessionStateMocks();
   createOpenClawCodingToolsMock.mockReset();
   createOpenClawCodingToolsMock.mockReturnValue([]);
 }
@@ -181,6 +195,22 @@ export async function loadCompactHooksHarness(): Promise<{
   vi.doMock("../runtime-plugins.js", () => ({
     ensureRuntimePluginsLoaded,
   }));
+
+  vi.doMock("../../plugins/provider-runtime.js", async () => {
+    const actual = await vi.importActual<typeof import("../../plugins/provider-runtime.js")>(
+      "../../plugins/provider-runtime.js",
+    );
+    return {
+      ...actual,
+      prepareProviderRuntimeAuth: prepareProviderRuntimeAuthMock,
+      prepareProviderExtraParams: vi.fn(() => undefined),
+      resolveProviderCapabilitiesWithPlugin: vi.fn(() => undefined),
+      resolveProviderStreamFn: resolveProviderStreamFnMock,
+      wrapProviderStreamFn: vi.fn(
+        (params: { context?: { streamFn?: unknown } }) => params.context?.streamFn,
+      ),
+    };
+  });
 
   vi.doMock("../../hooks/internal-hooks.js", async () => {
     const actual = await vi.importActual<typeof import("../../hooks/internal-hooks.js")>(
@@ -417,8 +447,8 @@ export async function loadCompactHooksHarness(): Promise<{
     resolveMemorySearchConfig: resolveMemorySearchConfigMock,
   }));
 
-  vi.doMock("../../memory/index.js", () => ({
-    getMemorySearchManager: getMemorySearchManagerMock,
+  vi.doMock("../../plugins/memory-runtime.js", () => ({
+    getActiveMemorySearchManager: getMemorySearchManagerMock,
   }));
 
   vi.doMock("../date-time.js", () => ({
