@@ -500,9 +500,12 @@ describe("session-memory hook", () => {
 
     const memoryContent = await getRecentSessionContentWithResetFallback(activeSessionFile!);
     expect(memoryContent).toBeTruthy();
+    if (!memoryContent) {
+      throw new Error("Expected reset fallback transcript content");
+    }
 
     expectMemoryConversation({
-      memoryContent: memoryContent!,
+      memoryContent,
       user: "Newest rotated transcript",
       assistant: "Newest summary",
       absent: "Older rotated transcript",
@@ -531,9 +534,12 @@ describe("session-memory hook", () => {
 
     const memoryContent = await getRecentSessionContentWithResetFallback(activeSessionFile!);
     expect(memoryContent).toBeTruthy();
+    if (!memoryContent) {
+      throw new Error("Expected active transcript content");
+    }
 
     expectMemoryConversation({
-      memoryContent: memoryContent!,
+      memoryContent,
       user: "Active transcript message",
       assistant: "Active transcript summary",
       absent: "Reset fallback message",

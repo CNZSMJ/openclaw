@@ -126,6 +126,9 @@ export function resolveMemoryFlushResetAtHour(params: {
   return resetPolicy.mode === "daily" ? resetPolicy.atHour : undefined;
 }
 
+function replaceMemoryFlushPlanPath(text: string, fromPath: string, toPath: string): string {
+  return fromPath === toPath ? text : text.replaceAll(fromPath, toPath);
+}
 function parseUsageFromTranscriptLine(line: string): ReturnType<typeof normalizeUsage> | undefined {
   const trimmed = line.trim();
   if (!trimmed) {
@@ -711,16 +714,16 @@ export async function runMemoryFlushIfNeeded(params: {
   }
   let memoryCompactionCompleted = false;
   const memoryFlushNowMs = Date.now();
-  const activeMemoryFlushPlan =
-    resolveMemoryFlushPlan({
-      cfg: params.cfg,
-      nowMs: memoryFlushNowMs,
-    }) ?? memoryFlushPlan;
   const memoryFlushResetAtHour = resolveMemoryFlushResetAtHour({
     cfg: params.cfg,
     sessionCtx: params.sessionCtx,
     sessionKey: params.sessionKey,
   });
+  const activeMemoryFlushPlan =
+    resolveMemoryFlushPlan({
+      cfg: params.cfg,
+      nowMs: memoryFlushNowMs,
+    }) ?? memoryFlushPlan;
   const defaultMemoryFlushWritePath = activeMemoryFlushPlan.relativePath;
   const sessionAwareMemoryFlushWritePath =
     typeof memoryFlushResetAtHour === "number"
@@ -742,17 +745,18 @@ export async function runMemoryFlushIfNeeded(params: {
   const memoryFlushWritePath = shouldRewriteFlushPath
     ? sessionAwareMemoryFlushWritePath
     : defaultMemoryFlushWritePath;
-  const memoryFlushPrompt = shouldRewriteFlushPath
-    ? activeMemoryFlushPlan.prompt.replaceAll(defaultMemoryFlushWritePath, memoryFlushWritePath)
-    : activeMemoryFlushPlan.prompt;
+  const memoryFlushPrompt = replaceMemoryFlushPlanPath(
+    activeMemoryFlushPlan.prompt,
+    defaultMemoryFlushWritePath,
+    memoryFlushWritePath,
+  );
   const flushSystemPrompt = [
     params.followupRun.run.extraSystemPrompt,
-    shouldRewriteFlushPath
-      ? activeMemoryFlushPlan.systemPrompt.replaceAll(
-          defaultMemoryFlushWritePath,
-          memoryFlushWritePath,
-        )
-      : activeMemoryFlushPlan.systemPrompt,
+    replaceMemoryFlushPlanPath(
+      activeMemoryFlushPlan.systemPrompt,
+      defaultMemoryFlushWritePath,
+      memoryFlushWritePath,
+    ),
   ]
     .filter(Boolean)
     .join("\n\n");
