@@ -76,6 +76,24 @@ process.stdout.write(hash.digest("hex"));
 ' "${INPUT_PATHS[@]}"
 }
 
+run_a2ui_tsc() {
+  local project_path="$1"
+  local typescript_entry="$ROOT_DIR/node_modules/typescript/bin/tsc"
+  local max_old_space_size="${OPENCLAW_A2UI_TSC_MAX_OLD_SPACE_SIZE_MB:-8192}"
+
+  if pnpm -s exec tsc -p "$project_path"; then
+    return 0
+  fi
+
+  if [[ -f "$typescript_entry" ]]; then
+    echo "A2UI: pnpm exec tsc failed, retrying with local TypeScript entrypoint." >&2
+    node "--max-old-space-size=$max_old_space_size" "$typescript_entry" -p "$project_path"
+    return 0
+  fi
+
+  return 1
+}
+
 current_hash="$(compute_hash)"
 if [[ -f "$HASH_FILE" ]]; then
   previous_hash="$(cat "$HASH_FILE")"
@@ -85,7 +103,7 @@ if [[ -f "$HASH_FILE" ]]; then
   fi
 fi
 
-pnpm -s exec tsc -p "$A2UI_RENDERER_DIR/tsconfig.json"
+run_a2ui_tsc "$A2UI_RENDERER_DIR/tsconfig.json"
 if command -v rolldown >/dev/null 2>&1 && rolldown --version >/dev/null 2>&1; then
   rolldown -c "$A2UI_APP_DIR/rolldown.config.mjs"
 elif [[ -f "$ROOT_DIR/node_modules/.pnpm/node_modules/rolldown/bin/cli.mjs" ]]; then

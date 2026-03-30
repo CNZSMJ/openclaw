@@ -593,6 +593,14 @@ describe("plugin-sdk subpath exports", () => {
       "buildVllmProvider",
       "discoverOpenAICompatibleSelfHostedProvider",
     ]);
+    expectSourceContract("self-hosted-provider-core", {
+      mentions: [
+        "discoverOpenAICompatibleLocalModels",
+        "discoverOpenAICompatibleSelfHostedProvider",
+        "configureOpenAICompatibleSelfHostedProviderNonInteractive",
+      ],
+      omits: ["buildVllmProvider", "buildSglangProvider"],
+    });
     expectSourceMentions("provider-auth", [
       "buildOauthProviderAuthResult",
       "generatePkceVerifierChallenge",
