@@ -5590,6 +5590,15 @@ export const GENERATED_BASE_CONFIG_SCHEMA = {
                   userAgent: {
                     type: "string",
                   },
+                  ssrfPolicy: {
+                    type: "object",
+                    properties: {
+                      allowRfc2544BenchmarkRange: {
+                        type: "boolean",
+                      },
+                    },
+                    additionalProperties: false,
+                  },
                   readability: {
                     type: "boolean",
                   },
@@ -12940,6 +12949,11 @@ export const GENERATED_BASE_CONFIG_SCHEMA = {
       label: "Web Fetch User-Agent",
       help: "Override User-Agent header for web_fetch requests.",
       tags: ["tools"],
+    },
+    "tools.web.fetch.ssrfPolicy.allowRfc2544BenchmarkRange": {
+      label: "Allow RFC2544 Fake-IP Range",
+      help: "Allow the RFC2544 benchmark range (198.18.0.0/15) for web_fetch. Useful for FakeIP proxy modes such as Clash, Surge, and Shadowrocket. Default: off.",
+      tags: ["access", "tools"],
     },
     "tools.web.fetch.readability": {
       label: "Web Fetch Readability Extraction",

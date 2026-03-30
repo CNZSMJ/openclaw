@@ -1,7 +1,7 @@
 import { Type } from "@sinclair/typebox";
 import type { OpenClawConfig } from "../../config/config.js";
 import { normalizeResolvedSecretInputString } from "../../config/types.secrets.js";
-import { SsrFBlockedError } from "../../infra/net/ssrf.js";
+import { SsrFBlockedError, type SsrFPolicy } from "../../infra/net/ssrf.js";
 import { logDebug } from "../../logger.js";
 import type { RuntimeWebFetchFirecrawlMetadata } from "../../secrets/runtime-web-tools.js";
 import { wrapExternalContent, wrapWebContent } from "../../security/external-content.js";
@@ -124,6 +124,28 @@ function resolveFetchMaxResponseBytes(fetch?: WebFetchConfig): number {
   }
   const value = Math.floor(raw);
   return Math.min(FETCH_MAX_RESPONSE_BYTES_MAX, Math.max(FETCH_MAX_RESPONSE_BYTES_MIN, value));
+}
+
+function resolveFetchSsrFPolicy(fetch?: WebFetchConfig): SsrFPolicy | undefined {
+  const allowRfc2544BenchmarkRange =
+    fetch &&
+    "ssrfPolicy" in fetch &&
+    fetch.ssrfPolicy &&
+    typeof fetch.ssrfPolicy === "object" &&
+    "allowRfc2544BenchmarkRange" in fetch.ssrfPolicy &&
+    fetch.ssrfPolicy.allowRfc2544BenchmarkRange === true;
+
+  if (!allowRfc2544BenchmarkRange) {
+    return undefined;
+  }
+
+  return {
+    allowRfc2544BenchmarkRange: true,
+  };
+}
+
+function encodeFetchSsrFPolicyCacheKey(policy?: SsrFPolicy): string {
+  return policy?.allowRfc2544BenchmarkRange === true ? "rfc2544" : "default";
 }
 
 function resolveFirecrawlConfig(fetch?: WebFetchConfig): FirecrawlFetchConfig {
@@ -457,6 +479,7 @@ type WebFetchRuntimeParams = FirecrawlRuntimeParams & {
   timeoutSeconds: number;
   cacheTtlMs: number;
   userAgent: string;
+  ssrfPolicy?: SsrFPolicy;
   readabilityEnabled: boolean;
 };
 
@@ -513,7 +536,7 @@ async function maybeFetchFirecrawlWebFetchPayload(
 
 async function runWebFetch(params: WebFetchRuntimeParams): Promise<Record<string, unknown>> {
   const cacheKey = normalizeCacheKey(
-    `fetch:${params.url}:${params.extractMode}:${params.maxChars}`,
+    `fetch:${params.url}:${params.extractMode}:${params.maxChars}:${encodeFetchSsrFPolicyCacheKey(params.ssrfPolicy)}`,
   );
   const cached = readCache(FETCH_CACHE, cacheKey);
   if (cached) {
@@ -539,6 +562,7 @@ async function runWebFetch(params: WebFetchRuntimeParams): Promise<Record<string
       url: params.url,
       maxRedirects: params.maxRedirects,
       timeoutSeconds: params.timeoutSeconds,
+      policy: params.ssrfPolicy,
       init: {
         headers: {
           Accept: "text/markdown, text/html;q=0.9, */*;q=0.1",
@@ -761,6 +785,7 @@ export function createWebFetchTool(options?: {
     (fetch && "userAgent" in fetch && typeof fetch.userAgent === "string" && fetch.userAgent) ||
     DEFAULT_FETCH_USER_AGENT;
   const maxResponseBytes = resolveFetchMaxResponseBytes(fetch);
+  const ssrfPolicy = resolveFetchSsrFPolicy(fetch);
   return {
     label: "Web Fetch",
     name: "web_fetch",
@@ -786,6 +811,7 @@ export function createWebFetchTool(options?: {
         timeoutSeconds: resolveTimeoutSeconds(fetch?.timeoutSeconds, DEFAULT_TIMEOUT_SECONDS),
         cacheTtlMs: resolveCacheTtlMs(fetch?.cacheTtlMinutes, DEFAULT_CACHE_TTL_MINUTES),
         userAgent,
+        ssrfPolicy,
         readabilityEnabled,
         firecrawlEnabled,
         firecrawlApiKey,

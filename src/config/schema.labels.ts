@@ -240,6 +240,7 @@ export const FIELD_LABELS: Record<string, string> = {
   "tools.web.fetch.cacheTtlMinutes": "Web Fetch Cache TTL (min)",
   "tools.web.fetch.maxRedirects": "Web Fetch Max Redirects",
   "tools.web.fetch.userAgent": "Web Fetch User-Agent",
+  "tools.web.fetch.ssrfPolicy.allowRfc2544BenchmarkRange": "Allow RFC2544 Fake-IP Range",
   "tools.web.fetch.readability": "Web Fetch Readability Extraction",
   "tools.web.fetch.firecrawl.enabled": "Enable Firecrawl Fallback",
   "tools.web.fetch.firecrawl.apiKey": "Firecrawl API Key", // pragma: allowlist secret

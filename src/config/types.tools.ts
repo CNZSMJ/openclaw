@@ -535,6 +535,18 @@ export type ToolsConfig = {
       maxRedirects?: number;
       /** Override User-Agent header for fetch requests. */
       userAgent?: string;
+      /**
+       * Opt-in SSRF policy overrides for web_fetch.
+       * Keep this narrow: only enable the exact exceptions you need.
+       */
+      ssrfPolicy?: {
+        /**
+         * Allow the RFC2544 benchmark range (198.18.0.0/15), which FakeIP proxy
+         * modes commonly use as placeholder DNS answers for public hosts.
+         * Default: false.
+         */
+        allowRfc2544BenchmarkRange?: boolean;
+      };
       /** Use Readability to extract main content (default: true). */
       readability?: boolean;
       firecrawl?: {
