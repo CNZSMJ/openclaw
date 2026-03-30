@@ -48,10 +48,24 @@ const imageToolProviderDeps = {
   getMediaUnderstandingProvider,
 };
 
+function resolveRemoteImageSsrFPolicy(cfg?: OpenClawConfig) {
+  const allowRfc2544BenchmarkRange =
+    cfg?.tools?.web?.fetch?.ssrfPolicy?.allowRfc2544BenchmarkRange === true;
+
+  if (!allowRfc2544BenchmarkRange) {
+    return undefined;
+  }
+
+  return {
+    allowRfc2544BenchmarkRange: true,
+  } as const;
+}
+
 export const __testing = {
   decodeDataUrl,
   coerceImageAssistantText,
   resolveImageToolMaxTokens,
+  resolveRemoteImageSsrFPolicy,
   setProviderDepsForTest(overrides?: {
     buildProviderRegistry?: typeof buildProviderRegistry;
     getMediaUnderstandingProvider?: typeof getMediaUnderstandingProvider;
@@ -343,6 +357,7 @@ export function createImageTool(options?: {
       );
       const maxBytesMb = typeof record.maxBytesMb === "number" ? record.maxBytesMb : undefined;
       const maxBytes = pickMaxBytes(options?.config, maxBytesMb);
+      const remoteImageSsrFPolicy = resolveRemoteImageSsrFPolicy(options?.config);
 
       const sandboxConfig: SandboxedBridgeMediaPathConfig | null =
         options?.sandbox && options?.sandbox.root.trim()
@@ -439,6 +454,9 @@ export function createImageTool(options?: {
             : await loadWebMedia(resolvedPath ?? resolvedImage, {
                 maxBytes,
                 localRoots: mediaLocalRoots,
+                // Reuse the web_fetch FakeIP opt-in so remote image URLs can be
+                // fetched through the same RFC2544-compatible public-host path.
+                ssrfPolicy: remoteImageSsrFPolicy,
               });
         if (media.kind !== "image") {
           throw new Error(`Unsupported media type: ${media.kind}`);

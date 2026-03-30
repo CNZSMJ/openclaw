@@ -496,6 +496,77 @@ describe("image tool implicit imageModel config", () => {
     __testing.setProviderDepsForTest();
   });
 
+  it("reuses the web_fetch FakeIP opt-in for remote image URLs", async () => {
+    expect(__testing.resolveRemoteImageSsrFPolicy()).toBeUndefined();
+    expect(
+      __testing.resolveRemoteImageSsrFPolicy({
+        tools: {
+          web: {
+            fetch: {
+              ssrfPolicy: {
+                allowRfc2544BenchmarkRange: true,
+              },
+            },
+          },
+        },
+      }),
+    ).toEqual({
+      allowRfc2544BenchmarkRange: true,
+    });
+  });
+
+  it("passes the web_fetch FakeIP opt-in through remote image loads", async () => {
+    const loadWebMediaMock = vi.fn(async () => ({
+      kind: "image" as const,
+      buffer: Buffer.from(ONE_PIXEL_PNG_B64, "base64"),
+      contentType: "image/png",
+    }));
+    const fetch = stubMinimaxOkFetch();
+    imageProviderHarness.setProviders([minimaxProvider, moonshotProvider]);
+
+    vi.resetModules();
+    vi.doMock("../../media/web-media.js", async (importOriginal) => {
+      const actual = await importOriginal<typeof import("../../media/web-media.js")>();
+      return {
+        ...actual,
+        loadWebMedia: loadWebMediaMock,
+      };
+    });
+
+    try {
+      const { createImageTool: createImageToolFresh } = await import("./image-tool.js");
+      await withTempAgentDir(async (agentDir) => {
+        const cfg: OpenClawConfig = {
+          ...createMinimaxImageConfig(),
+          tools: {
+            web: {
+              fetch: {
+                ssrfPolicy: {
+                  allowRfc2544BenchmarkRange: true,
+                },
+              },
+            },
+          },
+        };
+        const tool = requireImageTool(createImageToolFresh({ config: cfg, agentDir }));
+        await expectImageToolExecOk(tool, "https://example.com/a.png");
+      });
+
+      expect(loadWebMediaMock).toHaveBeenCalledWith(
+        "https://example.com/a.png",
+        expect.objectContaining({
+          ssrfPolicy: {
+            allowRfc2544BenchmarkRange: true,
+          },
+        }),
+      );
+      expect(fetch).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.doUnmock("../../media/web-media.js");
+      vi.resetModules();
+    }
+  });
+
   it("stays disabled without auth when no pairing is possible", async () => {
     await withTempAgentDir(async (agentDir) => {
       const cfg: OpenClawConfig = {
