@@ -177,6 +177,7 @@ export const mockedGetApiKeyForModel = vi.fn(
   }),
 );
 export const mockedResolveAuthProfileOrder = vi.fn(() => [] as string[]);
+export const mockedShouldPreferExplicitConfigApiKeyAuth = vi.fn(() => false);
 
 export const overflowBaseRunParams = {
   sessionId: "test-session",
@@ -309,6 +310,8 @@ export function resetRunOverflowCompactionHarnessMocks(): void {
   );
   mockedResolveAuthProfileOrder.mockReset();
   mockedResolveAuthProfileOrder.mockReturnValue([]);
+  mockedShouldPreferExplicitConfigApiKeyAuth.mockReset();
+  mockedShouldPreferExplicitConfigApiKeyAuth.mockReturnValue(false);
   mockedRunPostCompactionSideEffects.mockReset();
   mockedRunPostCompactionSideEffects.mockResolvedValue(undefined);
 }
@@ -339,9 +342,9 @@ export async function loadRunOverflowCompactionHarness(): Promise<{
     return {
       ...actual,
       prepareProviderRuntimeAuth: mockedPrepareProviderRuntimeAuth,
-      resolveProviderCapabilitiesWithPlugin: vi.fn(() => undefined),
-      prepareProviderExtraParams: vi.fn(() => undefined),
-      wrapProviderStreamFn: vi.fn((streamFn) => streamFn),
+      resolveProviderCapabilitiesWithPlugin: vi.fn(() => ({})),
+      prepareProviderExtraParams: vi.fn(async () => ({})),
+      wrapProviderStreamFn: vi.fn((_cfg: unknown, _model: unknown, fn: unknown) => fn),
     };
   });
 
@@ -421,10 +424,12 @@ export async function loadRunOverflowCompactionHarness(): Promise<{
   }));
 
   vi.doMock("../model-auth.js", () => ({
+    applyAuthHeaderOverride: vi.fn((model: unknown) => model),
     applyLocalNoAuthHeaderOverride: vi.fn((model: unknown) => model),
     ensureAuthProfileStore: vi.fn(() => ({})),
     getApiKeyForModel: mockedGetApiKeyForModel,
     resolveAuthProfileOrder: mockedResolveAuthProfileOrder,
+    shouldPreferExplicitConfigApiKeyAuth: mockedShouldPreferExplicitConfigApiKeyAuth,
   }));
 
   vi.doMock("../models-config.js", () => ({

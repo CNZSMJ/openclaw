@@ -1,8 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
+import { setActivePluginRegistry } from "../../plugins/runtime.js";
+import { createSessionConversationTestRegistry } from "../../test-utils/session-conversation-registry.js";
 import type { OpenClawConfig } from "../config.js";
 import {
   evaluateSessionFreshness,
+  isThreadSessionKey,
   resolveDailyResetAtMs,
+  resolveSessionResetType,
   type SessionResetPolicy,
 } from "./reset.js";
 
@@ -54,5 +58,24 @@ describe("session reset timezone semantics", () => {
       fresh: false,
       dailyResetAt: Date.UTC(2026, 2, 18, 20, 0, 0),
     });
+  });
+});
+
+describe("session reset thread detection", () => {
+  beforeEach(() => {
+    setActivePluginRegistry(createSessionConversationTestRegistry());
+  });
+
+  it("does not treat feishu conversation ids with embedded :topic: as thread suffixes", () => {
+    const sessionKey =
+      "agent:main:feishu:group:oc_group_chat:topic:om_topic_root:sender:ou_topic_user";
+    expect(isThreadSessionKey(sessionKey)).toBe(false);
+    expect(resolveSessionResetType({ sessionKey })).toBe("group");
+  });
+
+  it("still treats telegram :topic: suffixes as thread sessions", () => {
+    const sessionKey = "agent:main:telegram:group:-100123:topic:77";
+    expect(isThreadSessionKey(sessionKey)).toBe(true);
+    expect(resolveSessionResetType({ sessionKey })).toBe("thread");
   });
 });
