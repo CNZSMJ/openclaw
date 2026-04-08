@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import type { PluginLogger } from "openclaw/plugin-sdk/core";
+import type { PluginLogger } from "../api.js";
 import type { ContextInspectorStore } from "./store.js";
 import { buildContextInspectorHtml } from "./ui.js";
 

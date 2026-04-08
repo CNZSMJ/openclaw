@@ -42,7 +42,8 @@ describe("createContextInspectorHttpHandler", () => {
     const handled = await handler(makeReq("/plugins/context-inspector"), res as never);
     expect(handled).toBe(true);
     expect(res.statusCode).toBe(200);
-    expect(res.body).toContain("Context Inspector");
+    expect(res.body).toContain("<title>上下文分析台</title>");
+    expect(res.body).toContain("<h1>上下文分析台</h1>");
   });
 
   it("serves run summaries from the api", async () => {

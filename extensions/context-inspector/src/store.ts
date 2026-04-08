@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { PluginLogger } from "openclaw/plugin-sdk/core";
 import type {
   PluginHookAfterCompactionEvent,
   PluginHookAfterToolCallEvent,
@@ -11,6 +10,7 @@ import type {
   PluginHookLlmInputEvent,
   PluginHookLlmOutputEvent,
 } from "openclaw/plugin-sdk/hooks";
+import type { PluginLogger } from "../api.js";
 import {
   applyAttentionProxy,
   buildBootstrapSectionOrigins,

@@ -1,5 +1,5 @@
 import path from "node:path";
-import type { OpenClawPluginApi } from "openclaw/plugin-sdk/core";
+import { definePluginEntry, type OpenClawPluginApi } from "./api.js";
 import { resolveContextInspectorConfig } from "./src/config.js";
 
 type ContextInspectorStore = import("./src/store.js").ContextInspectorStore;
@@ -11,7 +11,7 @@ function toErrorMessage(error: unknown): string {
   return error instanceof Error ? (error.stack ?? error.message) : String(error);
 }
 
-const plugin = {
+export default definePluginEntry({
   id: "context-inspector",
   name: "Context Inspector",
   description: "Observe, analyze, and inspect real model context in a browser.",
@@ -109,6 +109,4 @@ const plugin = {
       },
     });
   },
-};
-
-export default plugin;
+});
