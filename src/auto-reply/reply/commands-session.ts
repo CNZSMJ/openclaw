@@ -13,6 +13,11 @@ import { getSessionBindingService } from "../../infra/outbound/session-binding-s
 import type { SessionBindingRecord } from "../../infra/outbound/session-binding-service.js";
 import { scheduleGatewaySigusr1Restart, triggerOpenClawRestart } from "../../infra/restart.js";
 import { loadCostUsageSummary, loadSessionCostSummary } from "../../infra/session-cost-usage.js";
+import {
+  normalizeLowercaseStringOrEmpty,
+  normalizeOptionalLowercaseString,
+  normalizeOptionalString,
+} from "../../shared/string-coerce.js";
 import { formatTokenCount, formatUsd } from "../../utils/usage-format.js";
 import { parseActivationCommand } from "../group-activation.js";
 import { parseSendPolicyCommand } from "../send-policy.js";
@@ -34,7 +39,7 @@ function resolveSessionCommandUsage() {
 }
 
 function parseSessionDurationMs(raw: string): number {
-  const normalized = raw.trim().toLowerCase();
+  const normalized = normalizeOptionalLowercaseString(raw);
   if (!normalized) {
     throw new Error("missing duration");
   }
@@ -77,7 +82,7 @@ function resolveSessionBindingLastActivityAt(binding: SessionBindingRecord): num
 
 function resolveSessionBindingBoundBy(binding: SessionBindingRecord): string {
   const raw = binding.metadata?.boundBy;
-  return typeof raw === "string" ? raw.trim() : "";
+  return normalizeOptionalString(raw) ?? "";
 }
 
 type UpdatedLifecycleBinding = {
@@ -259,7 +264,7 @@ export const handleUsageCommand: CommandHandler = async (params, allowTextComman
 
   const rawArgs = normalized === "/usage" ? "" : normalized.slice("/usage".length).trim();
   const requested = rawArgs ? normalizeUsageDisplay(rawArgs) : undefined;
-  if (rawArgs.toLowerCase().startsWith("cost")) {
+  if (normalizeLowercaseStringOrEmpty(rawArgs).startsWith("cost")) {
     const sessionSummary = await loadSessionCostSummary({
       sessionId: params.sessionEntry?.sessionId,
       sessionEntry: params.sessionEntry,
@@ -344,7 +349,7 @@ export const handleFastCommand: CommandHandler = async (params, allowTextCommand
   }
 
   const rawArgs = normalized === "/fast" ? "" : normalized.slice("/fast".length).trim();
-  const rawMode = rawArgs.toLowerCase();
+  const rawMode = normalizeLowercaseStringOrEmpty(rawArgs);
   if (!rawMode || rawMode === "status") {
     const state = resolveFastModeState({
       cfg: params.cfg,
@@ -403,7 +408,7 @@ export const handleSessionCommand: CommandHandler = async (params, allowTextComm
 
   const rest = normalized.slice(SESSION_COMMAND_PREFIX.length).trim();
   const tokens = rest.split(/\s+/).filter(Boolean);
-  const action = tokens[0]?.toLowerCase();
+  const action = normalizeOptionalLowercaseString(tokens[0]);
   if (action !== SESSION_ACTION_IDLE && action !== SESSION_ACTION_MAX_AGE) {
     return {
       shouldContinue: false,
@@ -415,8 +420,41 @@ export const handleSessionCommand: CommandHandler = async (params, allowTextComm
     params.command.channelId ??
     normalizeChannelId(resolveCommandSurfaceChannel(params)) ??
     undefined;
-  const channelPlugin = channelId ? getChannelPlugin(channelId) : undefined;
-  const conversationBindings = channelPlugin?.conversationBindings;
+  const commandConversationBindings = channelId
+    ? getChannelPlugin(channelId)?.conversationBindings
+    : undefined;
+  const commandSupportsCurrentConversationBinding = Boolean(
+    commandConversationBindings?.supportsCurrentConversationBinding,
+  );
+  const commandSupportsLifecycleUpdate =
+    action === SESSION_ACTION_IDLE
+      ? typeof commandConversationBindings?.setIdleTimeoutBySessionKey === "function"
+      : typeof commandConversationBindings?.setMaxAgeBySessionKey === "function";
+  const bindingContext = resolveConversationBindingContextFromAcpCommand(params);
+  if (!bindingContext) {
+    if (
+      !channelId ||
+      !commandSupportsCurrentConversationBinding ||
+      !commandSupportsLifecycleUpdate
+    ) {
+      return {
+        shouldContinue: false,
+        reply: {
+          text: "⚠️ /session idle and /session max-age are currently available only on channels that support focused conversation bindings.",
+        },
+      };
+    }
+    return {
+      shouldContinue: false,
+      reply: {
+        text: "⚠️ /session idle and /session max-age must be run inside a focused conversation.",
+      },
+    };
+  }
+  const resolvedChannelId = bindingContext.channel || channelId;
+  const conversationBindings = resolvedChannelId
+    ? getChannelPlugin(resolvedChannelId)?.conversationBindings
+    : undefined;
   const supportsCurrentConversationBinding = Boolean(
     conversationBindings?.supportsCurrentConversationBinding,
   );
@@ -424,7 +462,7 @@ export const handleSessionCommand: CommandHandler = async (params, allowTextComm
     action === SESSION_ACTION_IDLE
       ? typeof conversationBindings?.setIdleTimeoutBySessionKey === "function"
       : typeof conversationBindings?.setMaxAgeBySessionKey === "function";
-  if (!channelId || !supportsCurrentConversationBinding || !supportsLifecycleUpdate) {
+  if (!resolvedChannelId || !supportsCurrentConversationBinding || !supportsLifecycleUpdate) {
     return {
       shouldContinue: false,
       reply: {
@@ -434,15 +472,6 @@ export const handleSessionCommand: CommandHandler = async (params, allowTextComm
   }
 
   const sessionBindingService = getSessionBindingService();
-  const bindingContext = resolveConversationBindingContextFromAcpCommand(params);
-  if (!bindingContext) {
-    return {
-      shouldContinue: false,
-      reply: {
-        text: "⚠️ /session idle and /session max-age must be run inside a focused conversation.",
-      },
-    };
-  }
 
   const activeBinding = sessionBindingService.resolveByConversation(bindingContext);
   if (!activeBinding) {
@@ -503,7 +532,7 @@ export const handleSessionCommand: CommandHandler = async (params, allowTextComm
     };
   }
 
-  const senderId = params.command.senderId?.trim() || "";
+  const senderId = normalizeOptionalString(params.command.senderId) ?? "";
   const boundBy = resolveSessionBindingBoundBy(activeBinding);
   if (boundBy && boundBy !== "system" && senderId && senderId !== boundBy) {
     return {

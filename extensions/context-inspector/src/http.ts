@@ -156,7 +156,7 @@ function setSharedHeaders(res: ServerResponse, contentType: string) {
 }
 
 function isLoopbackRequest(req: IncomingMessage): boolean {
-  const remote = `${req.socket?.remoteAddress ?? ""}`.trim().toLowerCase();
+  const remote = (req.socket?.remoteAddress ?? "").trim().toLowerCase();
   const normalized = remote.startsWith("::ffff:") ? remote.slice("::ffff:".length) : remote;
   return (normalized === "127.0.0.1" || normalized === "::1") && !hasProxyHeaders(req);
 }

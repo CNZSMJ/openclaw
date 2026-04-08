@@ -89,7 +89,15 @@ function sanitizeUnknownValueInner(value: unknown, maxStringChars: number, depth
     }
     return output;
   }
-  return String(value);
+  if (
+    typeof value === "number" ||
+    typeof value === "boolean" ||
+    typeof value === "bigint" ||
+    typeof value === "symbol"
+  ) {
+    return value.toString();
+  }
+  return "[unserializable value]";
 }
 
 function splitSections(text: string): Array<{ label: string; text: string }> {
@@ -396,9 +404,8 @@ export function linkSegmentsToOrigins(params: {
   const bootstrapSectionEntries = params.origins
     .filter((origin): origin is InspectorOrigin => origin.kind === "bootstrap-file-section")
     .map((origin) => {
-      const fingerprint = String(
-        (origin.metadata as Record<string, unknown> | undefined)?.fingerprint ?? "",
-      );
+      const fingerprint =
+        typeof origin.metadata?.fingerprint === "string" ? origin.metadata.fingerprint : "";
       return [fingerprint, origin] as const;
     })
     .filter((entry) => entry[0].length > 0);
@@ -433,7 +440,7 @@ export function linkSegmentsToOrigins(params: {
       ...segment,
       originId: origin.id,
       metadata: {
-        ...(segment.metadata ?? {}),
+        ...segment.metadata,
         originKind: origin.kind,
         originLabel: origin.label,
         originPath: origin.path,
@@ -588,10 +595,10 @@ export function buildOptimizationSuggestions(params: {
   const duplicateRatio = params.totalChars > 0 ? params.duplicateChars / params.totalChars : 0;
   const workspaceFiles = params.report?.injectedWorkspaceFiles ?? [];
   const truncatedFiles = workspaceFiles.filter((file) => file.truncated);
-  const largestHistory = [...params.historySegments].sort((a, b) => b.chars - a.chars)[0];
+  const largestHistory = [...params.historySegments].toSorted((a, b) => b.chars - a.chars)[0];
   const largestBootstrapOrigin = [...(params.origins ?? [])]
     .filter((origin) => origin.kind === "bootstrap-file")
-    .sort((a, b) => b.chars - a.chars)[0];
+    .toSorted((a, b) => b.chars - a.chars)[0];
   const historyLimitedStage = params.contextStages?.find(
     (stage) => stage.stage === "history-limited",
   );
@@ -750,7 +757,7 @@ export function buildCutFirstRecommendations(params: {
       opportunities.push({
         id: `cut-${origin.id}`,
         kind: "bootstrap-file-section",
-        title: `${origin.label}`,
+        title: origin.label,
         chars: origin.chars,
         estimatedTokens: origin.estimatedTokens,
         reason: "Large always-on section inside an injected workspace file.",

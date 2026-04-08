@@ -3,6 +3,10 @@ import {
   resolveHumanResetBoundaryMs,
   resolveHumanResetCycleKey,
 } from "../../infra/format-time/human-day.js";
+import {
+  normalizeLowercaseStringOrEmpty,
+  normalizeOptionalLowercaseString,
+} from "../../shared/string-coerce.js";
 import { normalizeMessageChannel } from "../../utils/message-channel.js";
 import type { OpenClawConfig } from "../config.js";
 import type { SessionConfig, SessionResetConfig } from "../types.base.js";
@@ -43,7 +47,7 @@ export function resolveSessionResetType(params: {
   if (params.isGroup) {
     return "group";
   }
-  const normalized = (params.sessionKey ?? "").toLowerCase();
+  const normalized = normalizeLowercaseStringOrEmpty(params.sessionKey);
   if (GROUP_SESSION_MARKERS.some((marker) => normalized.includes(marker))) {
     return "group";
   }
@@ -127,12 +131,12 @@ export function resolveChannelResetConfig(params: {
     return undefined;
   }
   const normalized = normalizeMessageChannel(params.channel);
-  const fallback = params.channel?.trim().toLowerCase();
+  const fallback = normalizeOptionalLowercaseString(params.channel);
   const key = normalized ?? fallback;
   if (!key) {
     return undefined;
   }
-  return resetByChannel[key] ?? resetByChannel[key.toLowerCase()];
+  return resetByChannel[key];
 }
 
 export function evaluateSessionFreshness(params: {

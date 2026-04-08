@@ -8,6 +8,25 @@ export type SessionTranscriptExcerpt = {
   lastMessageTimestampMs?: number;
 };
 
+function extractTextMessageContent(content: unknown): string | undefined {
+  if (typeof content === "string") {
+    return content;
+  }
+  if (!Array.isArray(content)) {
+    return undefined;
+  }
+  for (const block of content) {
+    if (!block || typeof block !== "object") {
+      continue;
+    }
+    const candidate = block as { type?: unknown; text?: unknown };
+    if (candidate.type === "text" && typeof candidate.text === "string") {
+      return candidate.text;
+    }
+  }
+  return undefined;
+}
+
 export async function getRecentSessionExcerpt(
   sessionFilePath: string,
   messageCount: number = 15,
@@ -22,16 +41,18 @@ export async function getRecentSessionExcerpt(
       try {
         const entry = JSON.parse(line);
         if (entry.type === "message" && entry.message) {
-          const msg = entry.message;
+          const msg = entry.message as {
+            role?: unknown;
+            content?: unknown;
+            provenance?: unknown;
+            timestamp?: unknown;
+          };
           const role = msg.role;
-          if ((role === "user" || role === "assistant") && msg.content) {
+          if ((role === "user" || role === "assistant") && "content" in msg && msg.content) {
             if (role === "user" && hasInterSessionUserProvenance(msg)) {
               continue;
             }
-            const text = Array.isArray(msg.content)
-              ? // oxlint-disable-next-line typescript/no-explicit-any
-                msg.content.find((c: any) => c.type === "text")?.text
-              : msg.content;
+            const text = extractTextMessageContent(msg.content);
             if (text && !text.startsWith("/")) {
               allMessages.push(`${role}: ${text}`);
               const normalizedTimestamp = normalizeTimestamp(entry.timestamp ?? msg.timestamp);
