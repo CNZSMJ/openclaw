@@ -336,4 +336,112 @@ describe("anthropic transport stream", () => {
       undefined,
     );
   });
+
+  it("fails when the anthropic stream ends before closing a content block", async () => {
+    anthropicMessagesStreamMock.mockReturnValueOnce(
+      (async function* () {
+        yield {
+          type: "message_start",
+          message: { id: "msg_1", usage: { input_tokens: 10, output_tokens: 0 } },
+        };
+        yield {
+          type: "content_block_start",
+          index: 0,
+          content_block: {
+            type: "text",
+            text: "",
+          },
+        };
+        yield {
+          type: "content_block_delta",
+          index: 0,
+          delta: { type: "text_delta", text: "partial output" },
+        };
+      })(),
+    );
+    const streamFn = createAnthropicMessagesTransportStreamFn();
+    const result = await (
+      await Promise.resolve(
+        streamFn(
+          {
+            id: "claude-sonnet-4-6",
+            name: "Claude Sonnet 4.6",
+            api: "anthropic-messages",
+            provider: "anthropic",
+            baseUrl: "https://api.anthropic.com",
+            reasoning: true,
+            input: ["text"],
+            cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+            contextWindow: 200000,
+            maxTokens: 8192,
+          } satisfies Model<"anthropic-messages">,
+          {
+            messages: [{ role: "user", content: "hello" }],
+          } as Parameters<typeof streamFn>[1],
+          {
+            apiKey: "sk-ant-api",
+          } as Parameters<typeof streamFn>[2],
+        ),
+      )
+    ).result();
+
+    expect(result.stopReason).toBe("error");
+    expect(result.errorMessage).toContain("closing all content blocks");
+  });
+
+  it("fails when the anthropic stream ends without a terminal stop reason", async () => {
+    anthropicMessagesStreamMock.mockReturnValueOnce(
+      (async function* () {
+        yield {
+          type: "message_start",
+          message: { id: "msg_1", usage: { input_tokens: 10, output_tokens: 0 } },
+        };
+        yield {
+          type: "content_block_start",
+          index: 0,
+          content_block: {
+            type: "text",
+            text: "",
+          },
+        };
+        yield {
+          type: "content_block_delta",
+          index: 0,
+          delta: { type: "text_delta", text: "complete but unfinalized" },
+        };
+        yield {
+          type: "content_block_stop",
+          index: 0,
+        };
+      })(),
+    );
+    const streamFn = createAnthropicMessagesTransportStreamFn();
+    const result = await (
+      await Promise.resolve(
+        streamFn(
+          {
+            id: "claude-sonnet-4-6",
+            name: "Claude Sonnet 4.6",
+            api: "anthropic-messages",
+            provider: "anthropic",
+            baseUrl: "https://api.anthropic.com",
+            reasoning: true,
+            input: ["text"],
+            cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+            contextWindow: 200000,
+            maxTokens: 8192,
+          } satisfies Model<"anthropic-messages">,
+          {
+            messages: [{ role: "user", content: "hello" }],
+          } as Parameters<typeof streamFn>[1],
+          {
+            apiKey: "sk-ant-api",
+          } as Parameters<typeof streamFn>[2],
+        ),
+      )
+    ).result();
+
+    expect(result.stopReason).toBe("error");
+    expect(result.errorMessage).toContain("terminal stop_reason");
+  });
 });

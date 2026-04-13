@@ -632,8 +632,12 @@ export function createAnthropicMessagesTransportStreamFn(): StreamFn {
         ) as AsyncIterable<Record<string, unknown>>;
         stream.push({ type: "start", partial: output as never });
         const blocks = output.content;
+        let sawMessageStart = false;
+        let sawStopReason = false;
+        const openBlockIndexes = new Set<number>();
         for await (const event of anthropicStream) {
           if (event.type === "message_start") {
+            sawMessageStart = true;
             const message = event.message as
               | { id?: string; usage?: Record<string, unknown> }
               | undefined;
@@ -658,6 +662,9 @@ export function createAnthropicMessagesTransportStreamFn(): StreamFn {
           if (event.type === "content_block_start") {
             const contentBlock = event.content_block as Record<string, unknown> | undefined;
             const index = typeof event.index === "number" ? event.index : -1;
+            if (index >= 0) {
+              openBlockIndexes.add(index);
+            }
             if (contentBlock?.type === "text") {
               const block: TransportContentBlock = { type: "text", text: "", index };
               output.content.push(block);
@@ -787,6 +794,9 @@ export function createAnthropicMessagesTransportStreamFn(): StreamFn {
             if (!block) {
               continue;
             }
+            if (typeof event.index === "number") {
+              openBlockIndexes.delete(event.index);
+            }
             delete block.index;
             if (block.type === "text") {
               stream.push({
@@ -824,6 +834,7 @@ export function createAnthropicMessagesTransportStreamFn(): StreamFn {
             const delta = event.delta as { stop_reason?: string } | undefined;
             const usage = event.usage as Record<string, unknown> | undefined;
             if (delta?.stop_reason) {
+              sawStopReason = true;
               output.stopReason = mapStopReason(delta.stop_reason);
             }
             if (typeof usage?.input_tokens === "number") {
@@ -845,6 +856,15 @@ export function createAnthropicMessagesTransportStreamFn(): StreamFn {
               output.usage.cacheWrite;
             calculateCost(model, output.usage);
           }
+        }
+        if (!sawMessageStart) {
+          throw new Error("Anthropic stream ended before message_start");
+        }
+        if (openBlockIndexes.size > 0) {
+          throw new Error("Anthropic stream ended before closing all content blocks");
+        }
+        if (!sawStopReason) {
+          throw new Error("Anthropic stream ended without a terminal stop_reason");
         }
         finalizeTransportStream({ stream, output, signal: transportOptions.signal });
       } catch (error) {
