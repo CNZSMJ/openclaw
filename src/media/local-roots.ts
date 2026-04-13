@@ -4,8 +4,8 @@ import {
   resolveEffectiveToolFsRootExpansionAllowed,
   resolveEffectiveToolFsWorkspaceOnly,
 } from "../agents/tool-fs-policy.js";
-import type { OpenClawConfig } from "../config/config.js";
 import { resolveStateDir } from "../config/paths.js";
+import type { OpenClawConfig } from "../config/types.js";
 import { safeFileURLToPath } from "../infra/local-file-access.js";
 import { resolvePreferredOpenClawTmpDir } from "../infra/tmp-openclaw-dir.js";
 import { normalizeOptionalString } from "../shared/string-coerce.js";
@@ -38,14 +38,11 @@ export function buildMediaLocalRoots(
   return Array.from(
     new Set([
       preferredTmpDir,
+      path.join(resolvedConfigDir, "media"),
       path.join(resolvedStateDir, "media"),
+      path.join(resolvedStateDir, "canvas"),
       path.join(resolvedStateDir, "workspace"),
       path.join(resolvedStateDir, "sandboxes"),
-      // Upgraded installs can still resolve the active state dir to the legacy
-      // ~/.clawdbot tree while new media writes already go under ~/.openclaw/media.
-      // Keep inbound media readable across that split without widening roots beyond
-      // the managed media cache.
-      path.join(resolvedConfigDir, "media"),
     ]),
   );
 }

@@ -1,11 +1,11 @@
 import crypto from "node:crypto";
-import { lookupContextTokens } from "../../agents/context.js";
+import { resolveContextTokensForModel } from "../../agents/context.js";
 import { resolveCronStyleNow } from "../../agents/current-time.js";
 import { DEFAULT_CONTEXT_TOKENS } from "../../agents/defaults.js";
 import { DEFAULT_PI_COMPACTION_RESERVE_TOKENS_FLOOR } from "../../agents/pi-settings.js";
 import { parseNonNegativeByteSize } from "../../config/byte-size.js";
-import type { OpenClawConfig } from "../../config/config.js";
 import { resolveFreshSessionTotalTokens, type SessionEntry } from "../../config/sessions.js";
+import type { OpenClawConfig } from "../../config/types.openclaw.js";
 import { formatHumanDayKey, resolveHumanResetCycleKey } from "../../infra/format-time/human-day.js";
 import { SILENT_REPLY_TOKEN } from "../tokens.js";
 
@@ -164,11 +164,17 @@ function ensureMemoryFlushSafetyHints(text: string): string {
 export function resolveMemoryFlushContextWindowTokens(params: {
   modelId?: string;
   agentCfgContextTokens?: number;
+  cfg?: OpenClawConfig;
+  provider?: string;
 }): number {
   return (
-    lookupContextTokens(params.modelId, { allowAsyncLoad: false }) ??
-    params.agentCfgContextTokens ??
-    DEFAULT_CONTEXT_TOKENS
+    resolveContextTokensForModel({
+      cfg: params.cfg,
+      provider: params.provider,
+      model: params.modelId,
+      contextTokensOverride: params.agentCfgContextTokens,
+      allowAsyncLoad: false,
+    }) ?? DEFAULT_CONTEXT_TOKENS
   );
 }
 

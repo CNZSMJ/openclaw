@@ -6,6 +6,7 @@ import { makeZeroUsageSnapshot } from "./usage.js";
 
 export function handleAutoCompactionStart(ctx: EmbeddedPiSubscribeContext) {
   ctx.state.compactionInFlight = true;
+  ctx.state.livenessState = "paused";
   ctx.ensureCompactionPromise();
   ctx.log.debug(`embedded run compaction start: runId=${ctx.params.runId}`);
   emitAgentEvent({
@@ -67,6 +68,9 @@ export function handleAutoCompactionEnd(
     ctx.resetForCompactionRetry();
     ctx.log.debug(`embedded run compaction retry: runId=${ctx.params.runId}`);
   } else {
+    if (!wasAborted) {
+      ctx.state.livenessState = "working";
+    }
     ctx.maybeResolveCompactionWait();
     clearStaleAssistantUsageOnSessionMessages(ctx);
   }
@@ -84,16 +88,14 @@ export function handleAutoCompactionEnd(
   if (!willRetry) {
     const hookRunnerEnd = getGlobalHookRunner();
     if (hookRunnerEnd?.hasHooks("after_compaction")) {
+      const afterCompactionEvent = {
+        messageCount: ctx.params.session.messages?.length ?? 0,
+        compactedCount: ctx.getCompactionCount(),
+        sessionFile: ctx.params.session.sessionFile,
+        messages: ctx.params.session.messages,
+      } as Parameters<NonNullable<typeof hookRunnerEnd.runAfterCompaction>>[0];
       void hookRunnerEnd
-        .runAfterCompaction(
-          {
-            messageCount: ctx.params.session.messages?.length ?? 0,
-            compactedCount: ctx.getCompactionCount(),
-            sessionFile: ctx.params.session.sessionFile,
-            messages: ctx.params.session.messages,
-          },
-          { sessionKey: ctx.params.sessionKey },
-        )
+        .runAfterCompaction(afterCompactionEvent, { sessionKey: ctx.params.sessionKey })
         .catch((err) => {
           ctx.log.warn(`after_compaction hook failed: ${String(err)}`);
         });

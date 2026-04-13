@@ -1,25 +1,17 @@
 import { vi } from "vitest";
-import { resetTaskFlowRegistryForTests } from "../../tasks/task-flow-registry.js";
 import {
+  resetTaskRegistryControlRuntimeForTests,
   resetTaskRegistryDeliveryRuntimeForTests,
   resetTaskRegistryForTests,
+  setTaskRegistryControlRuntimeForTests,
   setTaskRegistryDeliveryRuntimeForTests,
-} from "../../tasks/task-registry.js";
+} from "../../tasks/runtime-internal.js";
+import { resetTaskFlowRegistryForTests } from "../../tasks/task-flow-runtime-internal.js";
 
 const runtimeTaskMocks = vi.hoisted(() => ({
   sendMessageMock: vi.fn(),
   cancelSessionMock: vi.fn(),
   killSubagentRunAdminMock: vi.fn(),
-}));
-
-vi.mock("../../acp/control-plane/manager.js", () => ({
-  getAcpSessionManager: () => ({
-    cancelSession: runtimeTaskMocks.cancelSessionMock,
-  }),
-}));
-
-vi.mock("../../agents/subagent-control.js", () => ({
-  killSubagentRunAdmin: (params: unknown) => runtimeTaskMocks.killSubagentRunAdminMock(params),
 }));
 
 export function getRuntimeTaskMocks() {
@@ -30,11 +22,18 @@ export function installRuntimeTaskDeliveryMock(): void {
   setTaskRegistryDeliveryRuntimeForTests({
     sendMessage: runtimeTaskMocks.sendMessageMock,
   });
+  setTaskRegistryControlRuntimeForTests({
+    getAcpSessionManager: () => ({
+      cancelSession: runtimeTaskMocks.cancelSessionMock,
+    }),
+    killSubagentRunAdmin: (params: unknown) => runtimeTaskMocks.killSubagentRunAdminMock(params),
+  });
 }
 
 export function resetRuntimeTaskTestState(
   taskRegistryOptions?: Parameters<typeof resetTaskRegistryForTests>[0],
 ): void {
+  resetTaskRegistryControlRuntimeForTests();
   resetTaskRegistryDeliveryRuntimeForTests();
   resetTaskRegistryForTests(taskRegistryOptions);
   resetTaskFlowRegistryForTests({ persist: false });
