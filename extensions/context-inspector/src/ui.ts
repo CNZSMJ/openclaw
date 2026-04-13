@@ -11,92 +11,211 @@ export function buildContextInspectorHtml(): string {
   const css = `
     :root {
       color-scheme: light;
-      --bg: #f4f1eb;
-      --bg-strong: #ece7de;
-      --panel: rgba(255, 255, 255, 0.72);
-      --panel-strong: rgba(255, 255, 255, 0.88);
-      --panel-subtle: rgba(255, 255, 255, 0.58);
-      --line: rgba(24, 28, 33, 0.08);
-      --line-strong: rgba(24, 28, 33, 0.14);
-      --text: #111418;
-      --muted: #68707c;
-      --muted-strong: #49515b;
+      --bg: #dce1ea;
+      --bg-strong: #cfd6e3;
+      --panel: #eef1f7;
+      --panel-strong: #f7f8fb;
+      --panel-subtle: #e4e9f2;
+      --surface: #fbfcfe;
+      --surface-muted: #f2f4f9;
+      --line: rgba(20, 24, 32, 0.1);
+      --line-strong: rgba(20, 24, 32, 0.16);
+      --text: #0f1419;
+      --muted: #5c6570;
+      --muted-strong: #3d4450;
       --accent: #0b6b72;
-      --accent-soft: rgba(11, 107, 114, 0.1);
+      --accent-soft: rgba(11, 107, 114, 0.14);
       --accent-strong: #0a4e54;
       --warn: #9a5d06;
-      --warn-soft: rgba(154, 93, 6, 0.16);
+      --warn-soft: rgba(154, 93, 6, 0.2);
       --danger: #932f21;
-      --danger-soft: rgba(147, 47, 33, 0.14);
-      --shadow: 0 12px 36px rgba(17, 20, 24, 0.08);
-      --radius: 24px;
+      --danger-soft: rgba(147, 47, 33, 0.18);
+      --shadow: 0 4px 24px rgba(15, 20, 30, 0.08), 0 1px 3px rgba(15, 20, 30, 0.06);
+      --shadow-soft: 0 2px 12px rgba(15, 20, 30, 0.05);
+      --radius: 20px;
+      --radius-lg: 22px;
+      --space: 20px;
+      --space-lg: 28px;
       --mono: "SFMono-Regular", "IBM Plex Mono", "Menlo", monospace;
       --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
       --serif: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
     }
     * { box-sizing: border-box; }
+    button:focus-visible,
+    .tab:focus-visible,
+    .run-card:focus-visible {
+      outline: 2px solid var(--accent-strong);
+      outline-offset: 2px;
+    }
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+    mark.hl {
+      background: rgba(11, 107, 114, 0.22);
+      color: inherit;
+      padding: 0 2px;
+      border-radius: 4px;
+    }
+    .status-banner {
+      margin: 0 0 var(--space);
+      padding: 14px 18px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      background: var(--surface);
+      border: 1px solid rgba(11, 107, 114, 0.2);
+      color: var(--muted-strong);
+    }
+    .status-banner.warn {
+      background: var(--warn-soft);
+      box-shadow: inset 0 0 0 1px rgba(154, 93, 6, 0.25);
+    }
+    .status-banner.error {
+      background: var(--danger-soft);
+      box-shadow: inset 0 0 0 1px rgba(147, 47, 33, 0.22);
+      color: var(--danger);
+    }
     html, body { margin: 0; min-height: 100%; background:
-      radial-gradient(circle at top left, rgba(11, 107, 114, 0.08), transparent 22%),
-      radial-gradient(circle at top right, rgba(147, 47, 33, 0.05), transparent 24%),
-      linear-gradient(180deg, #f7f5f1 0%, #f0ece5 100%);
+      radial-gradient(ellipse 90% 60% at 50% -10%, rgba(11, 107, 114, 0.12), transparent 55%),
+      radial-gradient(circle at 100% 0%, rgba(80, 100, 140, 0.08), transparent 40%),
+      linear-gradient(165deg, var(--bg) 0%, #c8d0df 100%);
       color: var(--text);
       font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
-    body { padding: 12px; }
-    .app { display: grid; grid-template-columns: 312px 1fr; gap: 14px; min-height: calc(100vh - 40px); }
+    body { padding: var(--space); }
+    .app {
+      display: grid;
+      grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+      gap: var(--space-lg);
+      min-height: calc(100vh - var(--space) * 2);
+      max-width: 1920px;
+      margin-inline: auto;
+    }
     .panel {
       background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius-lg);
       box-shadow: var(--shadow);
-      backdrop-filter: blur(24px);
     }
-    .sidebar { display: flex; flex-direction: column; overflow: hidden; position: sticky; top: 18px; max-height: calc(100vh - 36px); }
-    .hero { padding: 20px 20px 10px; background: linear-gradient(180deg, rgba(255,255,255,0.4), rgba(255,255,255,0)); }
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: sticky;
+      top: var(--space);
+      max-height: calc(100vh - var(--space) * 2);
+      background: linear-gradient(180deg, var(--panel-strong) 0%, var(--panel) 100%);
+    }
+    .hero {
+      padding: var(--space-lg) var(--space-lg) 14px;
+      border-bottom: 1px solid var(--line);
+    }
     .hero h1 {
       margin: 0;
       font-family: var(--serif);
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 600;
       letter-spacing: -0.03em;
+      color: var(--text);
     }
-    .hero p { margin: 8px 0 0; color: var(--muted-strong); line-height: 1.45; font-size: 13px; max-width: 28ch; }
+    .hero p {
+      margin: 12px 0 0;
+      color: var(--muted-strong);
+      line-height: 1.55;
+      font-size: 14px;
+      max-width: 36ch;
+    }
     .hero-guide {
       margin-top: 14px;
       padding: 0;
     }
     .hero-guide strong { display: block; font-size: 12px; margin-bottom: 6px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-    .hero-guide ol { margin: 0; padding-left: 18px; color: var(--muted-strong); font-size: 13px; line-height: 1.5; }
-    .toolbar { display: flex; gap: 8px; padding: 10px 16px 12px; background: transparent; }
+    .hero-guide ol {
+      margin: 0;
+      padding-left: 22px;
+      color: var(--muted-strong);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+    .hero-tip {
+      margin: 12px 0 0;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .hero-tip code {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted-strong);
+    }
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      padding: 14px var(--space-lg) 16px;
+      background: var(--surface-muted);
+      border-bottom: 1px solid var(--line);
+    }
     .toolbar input {
       width: 100%;
-      padding: 12px 14px;
-      border-radius: 999px;
+      padding: 14px 18px;
+      border-radius: 14px;
       border: 0;
-      background: rgba(255,255,255,0.9);
-      box-shadow: inset 0 0 0 1px var(--line);
+      background: var(--surface);
+      box-shadow: inset 0 0 0 1px var(--line-strong);
       font: inherit;
       color: inherit;
+      font-size: 14px;
     }
     .toolbar input::placeholder { color: var(--muted); }
-    .runs { overflow: auto; padding: 4px 12px 12px; display: flex; flex-direction: column; gap: 6px; }
-    .run-card {
-      padding: 12px 12px 12px 14px;
-      border-radius: 18px;
-      border: 0;
-      border-left: 3px solid transparent;
-      background: transparent;
+    .runs {
+      overflow: auto;
+      padding: 14px var(--space-lg) var(--space-lg);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    button.run-card {
+      display: block;
+      width: 100%;
+      text-align: left;
+      font: inherit;
+      color: inherit;
+      padding: 16px 16px 16px 18px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      border-left: 4px solid transparent;
+      background: var(--surface);
       cursor: pointer;
-      transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+      transition: transform 140ms ease, background 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+      box-shadow: var(--shadow-soft);
     }
     .run-card:hover, .run-card.active {
       transform: translateY(-1px);
       border-left-color: var(--accent);
-      background: rgba(255,255,255,0.72);
+      border-color: rgba(11, 107, 114, 0.22);
+      background: var(--panel-strong);
+      box-shadow: 0 4px 16px rgba(11, 107, 114, 0.08);
     }
-    .run-card h3 { margin: 0 0 6px; font-size: 15px; }
-    .run-meta { color: var(--muted-strong); font-size: 12px; display: flex; gap: 10px; flex-wrap: wrap; }
-    .run-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    button.run-card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .run-meta {
+      color: var(--muted-strong);
+      font-size: 13px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      line-height: 1.45;
+    }
+    .run-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
     .badge {
       font-size: 11px;
       font-weight: 600;
@@ -108,79 +227,270 @@ export function buildContextInspectorHtml(): string {
     }
     .badge.warn { background: var(--warn-soft); color: var(--warn); }
     .badge.danger { background: var(--danger-soft); color: var(--danger); }
-    .main { padding: 12px 14px 16px; overflow: auto; }
+    
+    .main {
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: var(--panel);
+    }
+    .main-header {
+      padding: var(--space-lg) var(--space-lg) 0;
+      background: var(--panel-strong);
+      border-bottom: 1px solid var(--line-strong);
+      flex-shrink: 0;
+    }
+    .main-scroll {
+      flex: 1;
+      overflow: auto;
+      padding: var(--space-lg);
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      margin-top: var(--space);
+    }
+    .nav-tab {
+      padding: 12px 24px;
+      border-radius: 12px 12px 0 0;
+      border: 1px solid transparent;
+      border-bottom: 0;
+      background: transparent;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 150ms ease;
+      font-size: 15px;
+    }
+    .nav-tab:hover {
+      color: var(--text);
+      background: var(--panel-subtle);
+    }
+    .nav-tab.active {
+      color: var(--accent-strong);
+      background: var(--panel);
+      border-color: var(--line-strong);
+      position: relative;
+      z-index: 1;
+    }
+    .nav-tab.active::after {
+      content: "";
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--panel);
+    }
+    /* 新增：仪表盘样式 */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space);
+      margin-top: var(--space);
+    }
+    .filter-section {
+      margin-bottom: var(--space-lg);
+      padding: var(--space);
+      background: var(--surface-muted);
+      border-radius: 16px;
+      border: 1px solid var(--line);
+    }
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .filter-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted-strong);
+      margin-right: 8px;
+      text-transform: uppercase;
+    }
+    .chip {
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--line-strong);
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 120ms ease;
+    }
+    .chip:hover {
+      background: var(--panel-subtle);
+      border-color: var(--accent);
+    }
+    .chip.active {
+      background: var(--accent);
+      color: white;
+      border-color: var(--accent);
+    }
+    .run-tile {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: var(--space);
+      cursor: pointer;
+      transition: all 150ms ease;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow-soft);
+    }
+    .run-tile:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+      border-color: var(--accent);
+    }
+    .run-tile h4 { margin: 0; font-size: 16px; }
+    .run-tile .tile-meta { font-size: 12px; color: var(--muted); }
+    .run-tile .tile-stats { display: flex; gap: 12px; font-size: 13px; font-weight: 600; }
     .topline {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
-      gap: 12px;
+      gap: 16px;
       align-items: center;
-      margin-bottom: 10px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--line);
     }
-    .topline h2 { margin: 0; font-size: 18px; font-family: var(--serif); font-weight: 600; letter-spacing: -0.025em; }
-    .topline p { margin: 4px 0 0; color: var(--muted-strong); font-size: 12px; }
+    .topline h2 {
+      margin: 0;
+      font-size: 22px;
+      font-family: var(--serif);
+      font-weight: 600;
+      letter-spacing: -0.025em;
+    }
+    .topline p { margin: 6px 0 0; color: var(--muted-strong); font-size: 14px; line-height: 1.45; }
     .actions { display: flex; gap: 10px; flex-wrap: wrap; }
     button {
       border: 0;
-      background: rgba(255,255,255,0.9);
+      background: var(--surface);
       color: var(--text);
-      border-radius: 999px;
-      padding: 8px 12px;
+      border-radius: 12px;
+      padding: 10px 16px;
       font-weight: 600;
       font: inherit;
+      font-size: 14px;
       cursor: pointer;
-      box-shadow: inset 0 0 0 1px var(--line);
+      box-shadow: inset 0 0 0 1px var(--line-strong);
     }
     button.primary {
       background: var(--accent);
       color: #f6efe6;
       box-shadow: none;
     }
-    .overview-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .overview-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space);
+      margin-bottom: var(--space-lg);
+    }
+    @media (min-width: 1500px) {
+      .overview-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
     .overview-card,
-    .stat { padding: 14px; border: 0; border-radius: 18px; background: rgba(255,255,255,0.52); box-shadow: inset 0 0 0 1px rgba(24, 28, 33, 0.05); }
+    .stat {
+      padding: 18px 20px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+    }
     .overview-card label,
-    .stat label { display: block; color: var(--muted); font-size: 11px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.08em; }
+    .stat label {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      font-weight: 700;
+    }
     .overview-card strong,
-    .stat strong { display: block; font-size: 17px; line-height: 1.2; }
-    .overview-card p { margin: 8px 0 0; color: var(--muted-strong); font-size: 12px; line-height: 1.4; }
-    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .stat strong { display: block; font-size: 17px; line-height: 1.35; font-weight: 600; }
+    .overview-card p {
+      margin: 12px 0 0;
+      color: var(--muted-strong);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space);
+      margin-bottom: var(--space-lg);
+    }
+    @media (min-width: 1500px) {
+      .stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    }
     .workspace-grid {
       display: grid;
-      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.55fr) minmax(320px, 0.95fr);
-      gap: 16px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-lg);
       align-items: start;
+    }
+    @media (min-width: 1280px) {
+      .workspace-grid {
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.25fr) minmax(300px, 0.95fr);
+        gap: var(--space-lg);
+      }
     }
     .workspace-column {
       min-width: 0;
-      padding: 14px;
-      border-radius: 26px;
-      background: rgba(255, 255, 255, 0.36);
-      box-shadow: inset 0 0 0 1px rgba(24, 28, 33, 0.05);
+      padding: var(--space-lg);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--line-strong);
+      box-shadow: var(--shadow-soft);
     }
-    .workspace-column > .stack { gap: 14px; }
+    .workspace-column:nth-child(1) {
+      background: linear-gradient(165deg, #f0f4fc 0%, #e6edf8 100%);
+    }
+    .workspace-column:nth-child(2) {
+      background: linear-gradient(165deg, #f2f8f8 0%, #e8f2f2 100%);
+    }
+    .workspace-column:nth-child(3) {
+      background: linear-gradient(165deg, #f8f5f0 0%, #f0ebe4 100%);
+    }
+    .workspace-column > .stack { gap: var(--space-lg); }
     .workspace-title {
-      margin: 0 0 12px;
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
+      margin: 0 0 var(--space);
+      padding-bottom: 12px;
+      border-bottom: 2px solid rgba(11, 107, 114, 0.2);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: var(--muted-strong);
     }
-    .stack { display: flex; flex-direction: column; gap: 16px; }
-    .card { padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
-    .card + .card { padding-top: 8px; border-top: 1px solid var(--line); }
-    .card h3 { margin: 0 0 4px; font-size: 19px; font-weight: 600; letter-spacing: -0.02em; }
-    .card-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; margin-bottom: 10px; }
-    .card-lead { color: var(--muted-strong); font-size: 13px; line-height: 1.45; margin: 0; }
-    .tree, .timeline, .segments { display: flex; flex-direction: column; gap: 10px; }
+    .stack { display: flex; flex-direction: column; gap: var(--space-lg); }
+    .card {
+      padding: var(--space-lg);
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+    }
+    .card .card-title {
+      margin: 0 0 12px;
+      font-size: 17px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      line-height: 1.3;
+      color: var(--text);
+    }
+    .card-lead {
+      color: var(--muted-strong);
+      font-size: 14px;
+      line-height: 1.55;
+      margin: 0 0 4px;
+    }
+    .tree, .timeline, .segments { display: flex; flex-direction: column; gap: 12px; }
     .tree-item, .timeline-item, .segment {
-      border: 0;
-      border-radius: 20px;
-      padding: 12px;
-      background: rgba(255,255,255,0.6);
-      box-shadow: inset 0 0 0 1px rgba(24, 28, 33, 0.05);
+      border-radius: 14px;
+      padding: 16px 18px;
+      background: var(--surface-muted);
+      border: 1px solid var(--line);
     }
     .tree-item.clickable,
     .timeline-item.clickable,
@@ -192,16 +502,23 @@ export function buildContextInspectorHtml(): string {
     .timeline-item.clickable:hover,
     .segment.clickable:hover {
       transform: translateY(-1px);
-      background: rgba(255,255,255,0.82);
-      box-shadow: inset 0 0 0 1px rgba(11, 107, 114, 0.12);
+      background: var(--surface);
+      border-color: rgba(11, 107, 114, 0.25);
+      box-shadow: 0 4px 14px rgba(11, 107, 114, 0.07);
     }
     .tree-item.active,
     .timeline-item.active,
     .segment.active {
-      background: rgba(11, 107, 114, 0.1);
-      box-shadow: inset 0 0 0 1px rgba(11, 107, 114, 0.18);
+      background: var(--accent-soft);
+      border-color: rgba(11, 107, 114, 0.35);
     }
-    .tree-item small, .timeline-item small, .segment small { color: var(--muted-strong); display: block; margin-top: 4px; }
+    .tree-item small, .timeline-item small, .segment small {
+      color: var(--muted-strong);
+      display: block;
+      margin-top: 6px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
     .timeline-item strong, .segment strong { display: block; margin-bottom: 6px; }
     .tree-item strong { display: block; margin-bottom: 4px; }
     .section-label {
@@ -223,53 +540,74 @@ export function buildContextInspectorHtml(): string {
       background: var(--accent);
     }
     .segment pre, .diff pre {
-      margin: 10px 0 0;
+      margin: 14px 0 0;
       white-space: pre-wrap;
       font-family: var(--mono);
-      font-size: 12px;
-      line-height: 1.58;
-      color: #20242a;
-      background: rgba(244, 246, 248, 0.95);
-      border: 0;
-      padding: 12px;
-      border-radius: 16px;
-      max-height: 360px;
+      font-size: 13px;
+      line-height: 1.62;
+      color: #1a1f26;
+      background: #e4e9f2;
+      border: 1px solid rgba(24, 28, 33, 0.1);
+      padding: 16px 18px;
+      border-radius: 12px;
+      max-height: min(52vh, 520px);
       overflow: auto;
-      box-shadow: inset 0 0 0 1px rgba(24, 28, 33, 0.06);
     }
-    .tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
-    .tab { padding: 8px 12px; border-radius: 999px; border: 0; cursor: pointer; font-weight: 600; background: rgba(255,255,255,0.9); box-shadow: inset 0 0 0 1px var(--line); }
+    .tabs { display: flex; gap: 10px; margin: 16px 0 14px; flex-wrap: wrap; }
+    .tab {
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 0;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      background: var(--surface-muted);
+      box-shadow: inset 0 0 0 1px var(--line);
+    }
     .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
     .muted { color: var(--muted-strong); }
     .empty {
-      min-height: 50vh;
+      min-height: 44vh;
       display: grid;
       place-items: center;
       text-align: center;
       color: var(--muted-strong);
-      border-radius: 28px;
-      background: rgba(255,255,255,0.4);
-      box-shadow: inset 0 0 0 1px var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface-muted);
+      border: 1px dashed var(--line-strong);
+      padding: var(--space-lg);
+      font-size: 15px;
+      line-height: 1.55;
     }
-    .diff { display: grid; gap: 10px; }
-    .metric-line { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+    .diff { display: grid; gap: 12px; }
+    .metric-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+    }
     .metric-line:last-child { border-bottom: 0; }
     .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
     .reading-path {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 14px;
+      grid-template-columns: 1fr;
+      gap: var(--space);
+      margin-bottom: var(--space-lg);
+    }
+    @media (min-width: 900px) {
+      .reading-path { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     }
     .path-step {
-      border: 0;
-      border-radius: 22px;
-      padding: 14px;
-      background: rgba(255,255,255,0.45);
-      box-shadow: inset 0 0 0 1px rgba(24, 28, 33, 0.05);
+      border-radius: 16px;
+      padding: 18px 20px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
     }
-    .path-step strong { display: block; font-size: 14px; margin-bottom: 8px; }
-    .path-step p { margin: 0; color: var(--muted-strong); font-size: 13px; line-height: 1.45; }
+    .path-step strong { display: block; font-size: 15px; margin-bottom: 10px; font-weight: 600; }
+    .path-step p { margin: 0; color: var(--muted-strong); font-size: 14px; line-height: 1.55; }
     .lane-summary {
       display: flex;
       gap: 8px;
@@ -280,12 +618,12 @@ export function buildContextInspectorHtml(): string {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-      padding: 12px 14px;
-      border-radius: 18px;
-      background: rgba(11, 107, 114, 0.08);
-      box-shadow: inset 0 0 0 1px rgba(11, 107, 114, 0.1);
+      gap: 16px;
+      margin-bottom: 16px;
+      padding: 16px 18px;
+      border-radius: 14px;
+      background: var(--accent-soft);
+      border: 1px solid rgba(11, 107, 114, 0.2);
     }
     .focus-bar strong {
       display: block;
@@ -403,21 +741,19 @@ export function buildContextInspectorHtml(): string {
       font-size: 13px;
       line-height: 1.45;
     }
-    @media (max-width: 1320px) {
-      .overview-grid,
-      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .reading-path { grid-template-columns: 1fr; }
+    @media (max-width: 1279px) {
       .workspace-grid { grid-template-columns: 1fr; }
-      .summary-grid,
-      .section-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 900px) {
-      body { padding: 14px; }
-      .app { grid-template-columns: 1fr; }
-      .sidebar { position: static; max-height: none; min-height: 340px; }
+      body { padding: 16px; }
+      .app { grid-template-columns: 1fr; gap: var(--space); }
+      .sidebar { position: static; max-height: none; min-height: 280px; }
       .overview-grid,
       .stats { grid-template-columns: 1fr; }
       .topline { grid-template-columns: 1fr; align-items: start; }
+      .reading-path { grid-template-columns: 1fr; }
+      .summary-grid,
+      .section-grid { grid-template-columns: 1fr; }
     }
   `;
 
@@ -427,22 +763,28 @@ export function buildContextInspectorHtml(): string {
       currentRun: null,
       currentDiff: null,
       activeTab: "system",
+      activeNav: "overview",
       cutFilter: "all",
       query: "",
+      filterProvider: "", // 新增
+      filterModel: "",    // 新增
       selectedOriginKey: "",
       selectedStage: "",
       selectedTimelineIndex: -1,
+      loadDepth: 0,
+      lastError: "",
+      statusHint: "",
     };
 
     const el = {
       runs: document.querySelector("#runs"),
       search: document.querySelector("#search"),
       content: document.querySelector("#content"),
-      refresh: document.querySelector("#refresh"),
-      compare: document.querySelector("#compare"),
-      heading: document.querySelector("#heading"),
-      subtitle: document.querySelector("#subtitle"),
+      main: document.querySelector("#inspector-main"),
+      statusBanner: document.querySelector("#status-banner"),
     };
+
+    const RUN_HASH_PREFIX = "#run=";
 
     const fmtNumber = new Intl.NumberFormat("zh-CN");
     const fmtDate = new Intl.DateTimeFormat("zh-CN", {
@@ -452,6 +794,104 @@ export function buildContextInspectorHtml(): string {
       minute: "2-digit",
       second: "2-digit",
     });
+
+    function setBusy(delta) {
+      state.loadDepth = Math.max(0, state.loadDepth + delta);
+    }
+
+    function captureScroll() {
+      return {
+        main: el.main ? el.main.scrollTop : 0,
+        runs: el.runs ? el.runs.scrollTop : 0,
+      };
+    }
+
+    function restoreScroll(saved) {
+      requestAnimationFrame(() => {
+        if (el.main) {
+          el.main.scrollTop = saved.main;
+        }
+        if (el.runs) {
+          el.runs.scrollTop = saved.runs;
+        }
+      });
+    }
+
+    function scrollSegmentsIntoView() {
+      requestAnimationFrame(() => {
+        const seg = document.getElementById("context-segments");
+        if (seg && typeof seg.scrollIntoView === "function") {
+          seg.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        }
+      });
+    }
+
+    function setStatusBanner(message, kind) {
+      if (!el.statusBanner) {
+        return;
+      }
+      el.statusBanner.textContent = message || "";
+      el.statusBanner.hidden = !message;
+      el.statusBanner.classList.remove("warn", "error");
+      if (kind === "warn") {
+        el.statusBanner.classList.add("warn");
+      }
+      if (kind === "error") {
+        el.statusBanner.classList.add("error");
+      }
+    }
+
+    function flashHint(text) {
+      state.statusHint = text;
+      setStatusBanner(text, "warn");
+      window.setTimeout(() => {
+        if (state.statusHint === text) {
+          state.statusHint = "";
+          if (!state.lastError) {
+            setStatusBanner("", "");
+          }
+        }
+      }, 4200);
+    }
+
+    function readRunIdFromHash() {
+      const raw = (location.hash || "").slice(1);
+      if (!raw.startsWith("run=")) {
+        return "";
+      }
+      try {
+        return decodeURIComponent(raw.slice("run=".length));
+      } catch {
+        return "";
+      }
+    }
+
+    function writeRunHash(runId) {
+      const next = RUN_HASH_PREFIX + encodeURIComponent(runId);
+      if (location.hash !== next) {
+        history.replaceState(null, "", next);
+      }
+    }
+
+    function highlightQuery(text, query) {
+      const q = (query || "").trim();
+      const base = escapeHtml(text);
+      if (!q) {
+        return base;
+      }
+      const lower = String(text).toLowerCase();
+      const qi = lower.indexOf(q.toLowerCase());
+      if (qi < 0) {
+        return base;
+      }
+      return (
+        escapeHtml(String(text).slice(0, qi)) +
+        '<mark class="hl">' +
+        escapeHtml(String(text).slice(qi, qi + q.length)) +
+        "</mark>" +
+        escapeHtml(String(text).slice(qi + q.length))
+      );
+    }
 
     async function fetchJson(url) {
       const res = await fetch(url, { headers: { accept: "application/json" } });
@@ -473,8 +913,8 @@ export function buildContextInspectorHtml(): string {
     }
 
     function renderFilterChips(filters, active) {
-      return '<div class="tabs">' + filters.map(([key, label, count]) =>
-        '<button class="tab ' + (active === key ? 'active' : '') + '" data-cut-filter="' + key + '">' +
+      return '<div class="tabs" role="tablist">' + filters.map(([key, label, count]) =>
+        '<button type="button" role="tab" class="tab ' + (active === key ? 'active' : '') + '" data-cut-filter="' + key + '" aria-selected="' + (active === key ? 'true' : 'false') + '">' +
           escapeHtml(label + " (" + count + ")") +
         '</button>'
       ).join("") + '</div>';
@@ -485,35 +925,35 @@ export function buildContextInspectorHtml(): string {
       const details = [];
       if (origin.kind === "bootstrap-file") {
         if (typeof meta.rawChars === "number") {
-          details.push("raw " + fmtNumber.format(meta.rawChars) + " chars");
+          details.push("原始 " + fmtNumber.format(meta.rawChars) + " 字符");
         }
         if (typeof meta.injectedChars === "number") {
-          details.push("injected " + fmtNumber.format(meta.injectedChars) + " chars");
+          details.push("注入 " + fmtNumber.format(meta.injectedChars) + " 字符");
         }
         if (meta.missing) {
-          details.push("missing at capture time");
+          details.push("采集时文件缺失");
         }
       }
       if (origin.kind === "bootstrap-file-section") {
         if (origin.path) {
-          details.push("section from " + origin.path);
+          details.push("片段来自 " + origin.path);
         }
         if (typeof meta.sectionIndex === "number") {
-          details.push("section #" + (meta.sectionIndex + 1));
+          details.push("片段序号 #" + (meta.sectionIndex + 1));
         }
       }
       if (origin.kind === "skill" && typeof meta.blockChars === "number") {
-        details.push("skill block " + fmtNumber.format(meta.blockChars) + " chars");
+        details.push("技能块 " + fmtNumber.format(meta.blockChars) + " 字符");
       }
       if (origin.kind === "tool-schema") {
         if (typeof meta.schemaChars === "number") {
-          details.push("schema " + fmtNumber.format(meta.schemaChars) + " chars");
+          details.push("Schema " + fmtNumber.format(meta.schemaChars) + " 字符");
         }
         if (typeof meta.summaryChars === "number") {
-          details.push("summary " + fmtNumber.format(meta.summaryChars) + " chars");
+          details.push("摘要 " + fmtNumber.format(meta.summaryChars) + " 字符");
         }
         if (typeof meta.propertiesCount === "number") {
-          details.push(fmtNumber.format(meta.propertiesCount) + " properties");
+          details.push(fmtNumber.format(meta.propertiesCount) + " 个属性");
         }
       }
       if (details.length === 0) return "";
@@ -525,34 +965,34 @@ export function buildContextInspectorHtml(): string {
       const details = [];
       if (item.type === "before_compaction") {
         if (typeof meta.originalMessageCount === "number") {
-          details.push("original " + fmtNumber.format(meta.originalMessageCount) + " messages");
+          details.push("压缩前 " + fmtNumber.format(meta.originalMessageCount) + " 条消息");
         }
         if (typeof meta.compactingCount === "number") {
-          details.push("compacting " + fmtNumber.format(meta.compactingCount) + " messages");
+          details.push("参与压缩 " + fmtNumber.format(meta.compactingCount) + " 条消息");
         }
         if (typeof meta.originalTokenCount === "number") {
-          details.push("original " + fmtNumber.format(meta.originalTokenCount) + " tok");
+          details.push("压缩前约 " + fmtNumber.format(meta.originalTokenCount) + " tok");
         }
         if (typeof meta.tokenCount === "number") {
-          details.push("compacting " + fmtNumber.format(meta.tokenCount) + " tok");
+          details.push("压缩段约 " + fmtNumber.format(meta.tokenCount) + " tok");
         }
       }
       if (item.type === "after_compaction") {
         if (typeof meta.tokensBefore === "number") {
-          details.push("before " + fmtNumber.format(meta.tokensBefore) + " tok");
+          details.push("压缩前 " + fmtNumber.format(meta.tokensBefore) + " tok");
         }
         if (typeof meta.tokenCount === "number") {
-          details.push("after " + fmtNumber.format(meta.tokenCount) + " tok");
+          details.push("压缩后 " + fmtNumber.format(meta.tokenCount) + " tok");
         }
         if (typeof meta.firstKeptEntryId === "string" && meta.firstKeptEntryId) {
-          details.push("first kept " + meta.firstKeptEntryId);
+          details.push("首条保留 " + meta.firstKeptEntryId);
         }
         if (typeof meta.summary === "string" && meta.summary) {
-          details.push("summary: " + meta.summary);
+          details.push("摘要：" + meta.summary);
         }
       }
       if (item.type === "after_tool_call" && typeof meta.durationMs === "number") {
-        details.push("duration " + fmtNumber.format(meta.durationMs) + " ms");
+        details.push("耗时 " + fmtNumber.format(meta.durationMs) + " ms");
       }
       return details.map((line) => '<small>' + escapeHtml(line) + '</small>').join("");
     }
@@ -560,13 +1000,13 @@ export function buildContextInspectorHtml(): string {
     function renderStageBadges(stage) {
       const badges = [];
       if (stage.charsDelta) {
-        badges.push('<span class="badge' + (stage.charsDelta > 0 ? ' warn' : '') + '">chars ' + escapeHtml(prettyDelta(stage.charsDelta)) + '</span>');
+        badges.push('<span class="badge' + (stage.charsDelta > 0 ? ' warn' : '') + '">字符 ' + escapeHtml(prettyDelta(stage.charsDelta)) + '</span>');
       }
       if (typeof stage.tokenDelta === "number" && stage.tokenDelta !== 0) {
         badges.push('<span class="badge' + (stage.tokenDelta > 0 ? ' warn' : '') + '">tok ' + escapeHtml(prettyDelta(stage.tokenDelta)) + '</span>');
       }
       if (stage.duplicateDelta) {
-        badges.push('<span class="badge' + (stage.duplicateDelta > 0 ? ' danger' : '') + '">dup ' + escapeHtml(prettyDelta(stage.duplicateDelta)) + '</span>');
+        badges.push('<span class="badge' + (stage.duplicateDelta > 0 ? ' danger' : '') + '">重复 ' + escapeHtml(prettyDelta(stage.duplicateDelta)) + '</span>');
       }
       return badges.join("");
     }
@@ -585,7 +1025,7 @@ export function buildContextInspectorHtml(): string {
       } else if (meta.originLabel) {
         parts.push(String(meta.originLabel));
       }
-      return '<small>source · ' + escapeHtml(parts.join(" · ")) + '</small>';
+      return '<small>来源 · ' + escapeHtml(parts.join(" · ")) + '</small>';
     }
 
     function buildOriginKey(kind, path, label) {
@@ -605,12 +1045,12 @@ export function buildContextInspectorHtml(): string {
         );
         if (origin) {
           chunks.push({
-            title: "Focused source",
+            title: "聚焦来源",
             body:
               origin.label +
               " · " +
               fmtNumber.format(origin.chars) +
-              " chars · " +
+              " 字符 · " +
               fmtNumber.format(origin.estimatedTokens) +
               " tok",
           });
@@ -620,14 +1060,14 @@ export function buildContextInspectorHtml(): string {
         const stage = (run.input.contextStages || []).find((item) => item.stage === state.selectedStage);
         if (stage) {
           chunks.push({
-            title: "Focused stage",
+            title: "聚焦阶段",
             body:
               prettyDelta(stage.charsDelta || 0) +
-              " chars · " +
+              " 字符 · " +
               prettyDelta(stage.tokenDelta || 0) +
               " tok · " +
               fmtNumber.format(stage.messageCount || 0) +
-              " messages",
+              " 条消息",
           });
         }
       }
@@ -635,7 +1075,7 @@ export function buildContextInspectorHtml(): string {
         const item = (run.timeline || [])[state.selectedTimelineIndex];
         if (item) {
           chunks.push({
-            title: "Focused event",
+            title: "聚焦时间线",
             body: item.title + (item.summary ? " · " + item.summary : ""),
           });
         }
@@ -652,12 +1092,14 @@ export function buildContextInspectorHtml(): string {
         escapeHtml(String(filteredCount)) +
         " / " +
         escapeHtml(String(totalCount)) +
-        " 个片段。</p></div><button id='clear-focus'>清除聚焦</button></div>"
+        " 个片段。</p></div><button type='button' id='clear-focus'>清除聚焦</button></div>"
       );
     }
 
     function renderRuns() {
+      const saved = captureScroll();
       const query = state.query.trim().toLowerCase();
+      const rawQuery = state.query.trim();
       const runs = state.runs.filter((run) => {
         if (!query) return true;
         return [run.runId, run.sessionKey, run.provider, run.model]
@@ -674,299 +1116,277 @@ export function buildContextInspectorHtml(): string {
               '<span class="badge' + (run.noiseScore >= 45 ? ' warn' : '') + '">噪音 ' + run.noiseScore + '</span>',
               '<span class="badge' + (run.duplicateChars > 8000 ? ' danger' : '') + '">重复 ' + fmtNumber.format(run.duplicateChars) + '</span>',
             ].join("");
-            return '<article class="run-card ' + (active ? 'active' : '') + '" data-run-id="' + run.runId + '">' +
-              '<h3>' + escapeHtml(run.provider + '/' + run.model) + '</h3>' +
+            const titleLine = run.provider + "/" + run.model;
+            return (
+              '<button type="button" class="run-card ' +
+              (active ? "active" : "") +
+              '" data-run-id="' +
+              escapeHtml(run.runId) +
+              '"' +
+              (active ? ' aria-current="true"' : "") +
+              ">" +
+              "<h3>" +
+              highlightQuery(titleLine, rawQuery) +
+              "</h3>" +
               '<div class="run-meta">' +
-                '<span>' + escapeHtml(run.sessionKey || run.runId) + '</span>' +
-                '<span>' + escapeHtml(fmtDate.format(new Date(run.startedAt))) + '</span>' +
-              '</div>' +
-              '<div class="run-badges">' + badges + '</div>' +
-            '</article>';
+              "<span>" +
+              highlightQuery(String(run.sessionKey || run.runId), rawQuery) +
+              "</span>" +
+              "<span>" +
+              escapeHtml(fmtDate.format(new Date(run.startedAt))) +
+              "</span>" +
+              "</div>" +
+              '<div class="run-badges">' +
+              badges +
+              "</div>" +
+              "</button>"
+            );
           }).join("")
         : '<div class="empty">还没有采集到运行记录。先触发一次 agent 运行，再刷新这里。</div>';
 
-      for (const card of el.runs.querySelectorAll(".run-card")) {
+      for (const card of el.runs.querySelectorAll("button.run-card")) {
         card.addEventListener("click", () => loadRun(card.getAttribute("data-run-id")));
       }
+      restoreScroll({ main: saved.main, runs: saved.runs });
     }
 
     function renderContent() {
+      const scrollSnap = captureScroll();
+      
       if (!state.currentRun) {
-        el.heading.textContent = "上下文工作台";
-        el.subtitle.textContent = "先从左侧选择一次运行，再查看真实送模内容、噪音、重复和执行过程。";
-        el.content.innerHTML = [
-          '<section class="reading-path">',
-            pathStep("1. 先挑一条最贵的运行", "优先看噪音分高、重复字符多、token 开销异常大的那条。"),
-            pathStep("2. 先看来源和切削点", "先读来源地图、优先裁剪和阶段变化，这三块最能解释为什么上下文会变大。"),
-            pathStep("3. 最后再看原始文本", "确定问题区域后，再进入上下文分栏读 system、prompt、history 的具体内容。"),
-          '</section>',
-          '<div class="empty">从左侧选一条运行记录。第一条真实采集结果就是你分析上下文的基准视图。</div>',
+        const header = document.querySelector(".main-header");
+        if (header) {
+          header.innerHTML = '<section class="topline"><div><h2>运行历史概览</h2><p>点击下方卡片或左侧列表开始分析。</p></div><div class="actions"><button type="button" id="refresh-all">刷新数据</button></div></section>';
+        }
+
+        // 提取所有 Provider 和 Model 用于筛选
+        const providers = [...new Set(state.runs.map(r => r.provider))].filter(Boolean);
+        const models = [...new Set(state.runs.map(r => r.model))].filter(Boolean);
+
+        const filterHtml = [
+          '<div class="filter-section">',
+            '<div class="filter-group" style="margin-bottom:12px">',
+              '<span class="filter-label">Provider:</span>',
+              '<button class="chip ' + (!state.filterProvider ? 'active' : '') + '" data-filter-p="">全部</button>',
+              providers.map(p => '<button class="chip ' + (state.filterProvider === p ? 'active' : '') + '" data-filter-p="' + escapeHtml(p) + '">' + escapeHtml(p) + '</button>').join(""),
+            '</div>',
+            '<div class="filter-group">',
+              '<span class="filter-label">模型:</span>',
+              modelChip("全部", ""),
+              models.map(m => modelChip(m, m)).join(""),
+            '</div>',
+          '</div>'
         ].join("");
+
+        function modelChip(label, val) {
+          return '<button class="chip ' + (state.filterModel === val ? 'active' : '') + '" data-filter-m="' + escapeHtml(val) + '">' + escapeHtml(label) + '</button>';
+        }
+
+        const filteredRuns = state.runs.filter(r => {
+          if (state.filterProvider && r.provider !== state.filterProvider) return false;
+          if (state.filterModel && r.model !== state.filterModel) return false;
+          if (state.query) {
+            const q = state.query.toLowerCase();
+            return [r.runId, r.sessionKey, r.provider, r.model].some(s => String(s || "").toLowerCase().includes(q));
+          }
+          return true;
+        });
+
+        const tilesHtml = filteredRuns.length ? 
+          '<div class="dashboard-grid">' + filteredRuns.map(r => 
+            '<div class="run-tile" data-run-id="' + r.runId + '">' +
+              '<h4>' + escapeHtml(r.provider + '/' + r.model) + '</h4>' +
+              '<div class="tile-meta">' + escapeHtml(fmtDate.format(new Date(r.startedAt))) + '</div>' +
+              '<div class="tile-stats">' +
+                '<span class="' + (r.noiseScore > 40 ? 'badge warn' : 'badge') + '">噪音 ' + r.noiseScore + '</span>' +
+                '<span class="badge">' + fmtNumber.format(r.estimatedTokens) + ' tok</span>' +
+              '</div>' +
+              '<div class="tile-meta" style="margin-top:auto">会话: ' + escapeHtml(r.sessionKey || r.runId) + '</div>' +
+            '</div>'
+          ).join("") + '</div>' :
+          '<div class="empty">没有符合筛选条件的运行记录。</div>';
+
+        el.content.innerHTML = filterHtml + tilesHtml;
+
+        // 绑定筛选事件
+        for (const btn of el.content.querySelectorAll("[data-filter-p]")) {
+          btn.addEventListener("click", () => { state.filterProvider = btn.getAttribute("data-filter-p"); renderContent(); });
+        }
+        for (const btn of el.content.querySelectorAll("[data-filter-m]")) {
+          btn.addEventListener("click", () => { state.filterModel = btn.getAttribute("data-filter-m"); renderContent(); });
+        }
+        for (const tile of el.content.querySelectorAll(".run-tile")) {
+          tile.addEventListener("click", () => loadRun(tile.getAttribute("data-run-id")));
+        }
+        document.querySelector("#refresh-all")?.addEventListener("click", refresh);
         return;
       }
+
       const run = state.currentRun;
-      el.heading.textContent = run.provider + "/" + run.model;
-      el.subtitle.textContent = (run.sessionKey || run.runId) + " · " + fmtDate.format(new Date(run.startedAt));
-
-      const tabs = [
-        ["system", "系统"],
-        ["prompt", "提示词"],
-        ["history", "历史"],
+      
+      // 渲染主导航
+      const navs = [
+        ["overview", "1. 诊断概览"],
+        ["structure", "2. 来源与成本"],
+        ["content", "3. 最终正文"],
       ];
-      const tabHtml = tabs.map(([key, label]) =>
-        '<button class="tab ' + (state.activeTab === key ? 'active' : '') + '" data-tab="' + key + '">' + label + '</button>'
-      ).join("");
-      const segments =
-        state.activeTab === "system" ? run.input.systemSegments :
-        state.activeTab === "prompt" ? run.input.promptSegments :
-        run.input.historySegments;
-      const filteredSegments = segments.filter((segment) => {
-        if (!state.selectedOriginKey) return true;
-        return getSegmentOriginKey(segment) === state.selectedOriginKey;
-      });
-      const segmentHtml = filteredSegments.length
-        ? filteredSegments.map((segment) => {
-            const attention = typeof segment.attentionProxyScore === "number"
-              ? '<span class="badge">attention proxy ' + segment.attentionProxyScore + '</span>'
-              : "";
-            const active = state.selectedOriginKey && getSegmentOriginKey(segment) === state.selectedOriginKey;
-            return '<article class="segment clickable ' + (active ? 'active' : '') + '" data-segment-origin="' + escapeHtml(getSegmentOriginKey(segment)) + '">' +
-              '<strong>' + escapeHtml(segment.label) + '</strong>' +
-              '<small>' + fmtNumber.format(segment.chars) + ' chars · ' + fmtNumber.format(segment.estimatedTokens) + ' tok · duplicate ' + fmtNumber.format(segment.duplicateChars) + '</small>' +
-              renderSegmentSource(segment) +
-              '<div class="pill-row">' + attention + '</div>' +
-              '<pre>' + escapeHtml(segment.text || "(empty)") + '</pre>' +
-            '</article>';
-          }).join("")
-        : '<div class="muted">No segments match the current focus in this lane.</div>';
+      const navHtml = '<div class="nav-tabs">' + navs.map(([key, label]) => 
+        '<button type="button" class="nav-tab ' + (state.activeNav === key ? 'active' : '') + '" data-nav="' + key + '">' + label + '</button>'
+      ).join("") + '</div>';
 
-      const origins = [...(run.input.origins || [])]
-        .sort((a, b) => (b.chars || 0) - (a.chars || 0))
-        .map((origin) => {
-        const originKey = buildOriginKey(origin.kind, origin.path, origin.label);
-        return '<div class="tree-item clickable ' + (state.selectedOriginKey === originKey ? 'active' : '') + '" data-origin-key="' + escapeHtml(originKey) + '">' +
+      // 准备数据
+      const originsSorted = [...(run.input.origins || [])].sort((a, b) => (b.chars || 0) - (a.chars || 0));
+      const tabs = [["system", "系统"], ["prompt", "提示词"], ["history", "历史"]];
+      const tabHtml = tabs.map(([key, label]) =>
+        '<button type="button" role="tab" class="tab ' + (state.activeTab === key ? "active" : "") + '" data-tab="' + key + '" aria-selected="' + (state.activeTab === key ? "true" : "false") + '">' + label + "</button>"
+      ).join("");
+      
+      const segments = state.activeTab === "system" ? run.input.systemSegments : state.activeTab === "prompt" ? run.input.promptSegments : run.input.historySegments;
+      const filteredSegments = segments.filter(s => !state.selectedOriginKey || getSegmentOriginKey(s) === state.selectedOriginKey);
+      
+      const segmentHtml = filteredSegments.length ? filteredSegments.map(segment => {
+        const attention = typeof segment.attentionProxyScore === "number" ? '<span class="badge">attention 近似分 ' + segment.attentionProxyScore + "</span>" : "";
+        const active = state.selectedOriginKey && getSegmentOriginKey(segment) === state.selectedOriginKey;
+        return '<article class="segment clickable ' + (active ? 'active' : '') + '" data-segment-origin="' + escapeHtml(getSegmentOriginKey(segment)) + '" title="点击联动筛选来源">' +
+          '<strong>' + escapeHtml(segment.label) + '</strong>' +
+          '<small>' + fmtNumber.format(segment.chars) + ' 字符 · ' + fmtNumber.format(segment.estimatedTokens) + ' tok</small>' +
+          '<pre>' + escapeHtml(segment.text || "（空）") + '</pre>' +
+        '</article>';
+      }).join("") : '<div class="muted">当前筛选下无内容。</div>';
+
+      const originsHtml = originsSorted.map(origin => {
+        const key = buildOriginKey(origin.kind, origin.path, origin.label);
+        return '<div class="tree-item clickable ' + (state.selectedOriginKey === key ? 'active' : '') + '" data-origin-key="' + escapeHtml(key) + '">' +
           '<strong>' + escapeHtml(origin.label) + '</strong>' +
-          '<small>' + escapeHtml(origin.kind + (origin.path ? ' · ' + origin.path : '')) + '</small>' +
-          '<small>' + fmtNumber.format(origin.chars) + ' 字符 · ' + fmtNumber.format(origin.estimatedTokens) + ' tok' + (origin.truncated ? ' · 已截断' : '') + '</small>' +
-          renderOriginDetails(origin) +
+          '<small>' + fmtNumber.format(origin.chars) + ' 字符 · ' + fmtNumber.format(origin.estimatedTokens) + ' tok</small>' +
         '</div>';
       }).join("");
-      const workspaceFiles = ((run.input.report && run.input.report.injectedWorkspaceFiles) || []).map((file) =>
-        '<div class="tree-item">' +
-          '<strong>' + escapeHtml(file.name || "workspace file") + '</strong>' +
-          '<small>' + escapeHtml((file.path || "") + (file.missing ? " · 缺失" : "")) + '</small>' +
-          '<small>原始 ' + fmtNumber.format(file.rawChars || 0) + ' · 注入 ' + fmtNumber.format(file.injectedChars || 0) + (file.truncated ? ' · 已截断' : '') + '</small>' +
-        '</div>'
-      ).join("");
-      const suggestions = (run.input.suggestions || []).map((item) =>
-        '<div class="tree-item">' +
-          '<div class="pill-row"><span class="badge ' + (item.severity === "danger" ? "danger" : item.severity === "warn" ? "warn" : "") + '">' + escapeHtml(item.severity === "danger" ? "高" : item.severity === "warn" ? "中" : "低") + '</span></div>' +
-          '<strong>' + escapeHtml(item.title) + '</strong>' +
-          '<small>' + escapeHtml(item.detail) + '</small>' +
-          (item.evidence ? '<small>证据：' + escapeHtml(item.evidence) + '</small>' : '') +
-          (item.action ? '<small>建议动作：' + escapeHtml(item.action) + '</small>' : '') +
-        '</div>'
-      ).join("");
-      const cutItems = [...(run.input.cutFirst || [])];
-      const cutCounts = {
-        all: cutItems.length,
-        bootstrap: cutItems.filter((item) => classifyCutItem(item) === "bootstrap").length,
-        history: cutItems.filter((item) => classifyCutItem(item) === "history").length,
-        tools: cutItems.filter((item) => classifyCutItem(item) === "tools").length,
-      };
-      const visibleCutItems = cutItems.filter((item) =>
-        state.cutFilter === "all" ? true : classifyCutItem(item) === state.cutFilter
-      );
-      const cutFilters = renderFilterChips(
-        [
-          ["all", "全部", cutCounts.all],
-          ["bootstrap", "静态注入", cutCounts.bootstrap],
-          ["history", "历史", cutCounts.history],
-          ["tools", "工具", cutCounts.tools],
-        ],
-        state.cutFilter,
-      );
-      const cutFirst = visibleCutItems.map((item, index) =>
-        '<div class="tree-item clickable" data-cut-kind="' + escapeHtml(item.kind || "") + '" data-cut-path="' + escapeHtml(item.path || "") + '" data-cut-label="' + escapeHtml(item.title || "") + '">' +
-          '<strong>' + escapeHtml((index + 1) + ". " + item.title) + '</strong>' +
-          '<small>' + escapeHtml(item.kind + (item.path ? ' · ' + item.path : '')) + '</small>' +
-          '<small>' + fmtNumber.format(item.chars) + ' 字符 · ' + fmtNumber.format(item.estimatedTokens) + ' tok</small>' +
-          '<small>' + escapeHtml(item.reason) + '</small>' +
-          '<small>建议动作：' + escapeHtml(item.action) + '</small>' +
-        '</div>'
-      ).join("");
 
-      const timeline = (run.timeline || []).map((item, index) =>
-        '<div class="timeline-item clickable ' + (state.selectedTimelineIndex === index ? 'active' : '') + '" data-timeline-index="' + index + '">' +
-          '<strong>' + escapeHtml(item.title) + '</strong>' +
-          '<small>' + escapeHtml(fmtDate.format(new Date(item.at))) + '</small>' +
-          (item.summary ? '<small>' + escapeHtml(item.summary) + '</small>' : '') +
-          renderTimelineDetails(item) +
-        '</div>'
-      ).join("");
-      const stageLabels = {
-        "sanitized": "清洗后",
-        "validated": "Provider 校验后",
-        "history-limited": "历史裁剪后",
-        "tool-pair-repaired": "工具配对修复后",
-        "context-engine-assembled": "上下文组装后",
-        "final": "最终送模前快照",
-      };
-      const contextStages = (run.input.contextStages || []).map((stage) =>
-        '<div class="tree-item clickable ' + (state.selectedStage === stage.stage ? 'active' : '') + '" data-stage="' + escapeHtml(stage.stage) + '">' +
-          '<strong>' + escapeHtml(stageLabels[stage.stage] || stage.stage) + '</strong>' +
-          '<small>' + fmtNumber.format(stage.messageCount) + ' 条消息 · ' + fmtNumber.format(stage.chars) + ' 字符 · ' + fmtNumber.format(stage.estimatedTokens || 0) + ' tok</small>' +
-          '<small>重复 ' + fmtNumber.format(stage.duplicateChars) + '</small>' +
+      const contextStages = (run.input.contextStages || []).map(stage => {
+        const labels = { "sanitized": "清洗", "validated": "校验", "history-limited": "裁剪", "context-engine-assembled": "组装", "final": "最终" };
+        return '<div class="tree-item clickable ' + (state.selectedStage === stage.stage ? 'active' : '') + '" data-stage="' + escapeHtml(stage.stage) + '">' +
+          '<strong>' + escapeHtml(labels[stage.stage] || stage.stage) + '</strong>' +
           '<div class="pill-row">' + renderStageBadges(stage) + '</div>' +
-        '</div>'
-      ).join("");
+        '</div>';
+      }).join("");
 
-      const diff = state.currentDiff
-        ? '<div class="diff">' +
-            '<div class="metric-line"><span>字符变化</span><strong>' + prettyDelta(state.currentDiff.metrics.charsDelta) + '</strong></div>' +
-            '<div class="metric-line"><span>Token 变化</span><strong>' + prettyDelta(state.currentDiff.metrics.tokenDelta) + '</strong></div>' +
-            '<div class="metric-line"><span>噪音变化</span><strong>' + prettyDelta(state.currentDiff.metrics.noiseDelta) + '</strong></div>' +
-            '<div class="metric-line"><span>重复变化</span><strong>' + prettyDelta(state.currentDiff.metrics.duplicateDelta) + '</strong></div>' +
-            '<pre>' + escapeHtml(state.currentDiff.base ? ('对比基线：' + state.currentDiff.base.runId + '\\n会话：' + (state.currentDiff.base.sessionKey || 'n/a')) : '没有找到同会话中的上一条可对比运行。') + '</pre>' +
+      let bodyHtml = "";
+      if (state.activeNav === "overview") {
+        const topOrigin = originsSorted[0];
+        bodyHtml = [
+          '<section class="overview-grid">',
+            overviewCard("健康度诊断", (run.input.noiseScore > 40 ? "⚠️ 噪音较高" : "✅ 结构良好"), "噪音分：" + run.input.noiseScore + "。过高的噪音会分散模型注意力。"),
+            overviewCard("冗余度", (run.input.duplicateChars > 5000 ? "⚠️ 存在大量重复" : "✅ 重复率低"), "重复字符：" + fmtNumber.format(run.input.duplicateChars) + "。建议检查工具定义或历史消息。"),
+            overviewCard("最大成本项", topOrigin ? topOrigin.label : "无", topOrigin ? fmtNumber.format(topOrigin.chars) + " 字符 (" + topOrigin.kind + ")" : ""),
+            overviewCard("优化建议", (run.input.suggestions?.length || 0) + " 条", "点击「来源与成本」查看具体改进动作。"),
+          '</section>',
+          '<section class="stats">',
+            stat("总长度", fmtNumber.format(run.input.chars) + " 字符"),
+            stat("估算 Token", fmtNumber.format(run.input.estimatedTokens)),
+            stat("工具调用", String(run.counters.toolCalls)),
+            stat("压缩次数", String(run.counters.compactions)),
+          '</section>',
+          card("下一步动作", "基于分析结果建议的操作：", (run.input.suggestions?.length ? 
+            '<div class="tree">' + run.input.suggestions.map(s => '<div class="tree-item"><strong>' + escapeHtml(s.title) + '</strong><small>' + escapeHtml(s.detail) + '</small></div>').join("") + '</div>' : 
+            '<div class="muted">目前一切良好，暂无建议。</div>'))
+        ].join("");
+      } else if (state.activeNav === "structure") {
+        bodyHtml = [
+          '<div class="workspace-grid">',
+            '<div class="workspace-column"><div class="workspace-title">成本分布 (Origins)</div><div class="stack">',
+              card("来源地图", "按体积排序，点击项可在「最终正文」中高亮。", '<div class="tree">' + originsHtml + '</div>'),
+              card("注入文件", "工作区上下文注入情况。", (run.input.report?.injectedWorkspaceFiles?.length ? '<div class="tree">' + run.input.report.injectedWorkspaceFiles.map(f => '<div class="tree-item"><strong>' + escapeHtml(f.name) + '</strong><small>' + fmtNumber.format(f.injectedChars) + ' 字符</small></div>').join("") + '</div>' : '<div class="muted">无文件注入。</div>')),
+            '</div></div>',
+            '<div class="workspace-column"><div class="workspace-title">处理阶段 (Stages)</div><div class="stack">',
+              card("流水线变化", "查看 Prompt 在各阶段的增减。", '<div class="tree">' + contextStages + '</div>'),
+              card("会话对比", "与上一条运行的差异。", state.currentDiff ? '<div class="diff"><div class="metric-line"><span>字符变化</span><strong>' + prettyDelta(state.currentDiff.metrics.charsDelta) + '</strong></div><div class="metric-line"><span>Token 变化</span><strong>' + prettyDelta(state.currentDiff.metrics.tokenDelta) + '</strong></div></div>' : '<div class="muted">无对比数据。</div>'),
+            '</div></div>',
+            '<div class="workspace-column"><div class="workspace-title">优化建议 (Actions)</div><div class="stack">',
+              card("优先裁剪项", "建议删除或缩减的内容。", '<div class="tree">' + (run.input.cutFirst?.length ? run.input.cutFirst.map(c => '<div class="tree-item"><strong>' + escapeHtml(c.title) + '</strong><small>' + escapeHtml(c.reason) + '</small><small>建议：' + escapeHtml(c.action) + '</small></div>').join("") : '<div class="muted">无明显可裁剪项。</div>') + '</div>'),
+            '</div></div>',
           '</div>'
-        : '<div class="muted">先选中一条运行，再和同会话里的上一条运行做对比。</div>';
+        ].join("");
+      } else {
+        bodyHtml = [
+          card("最终送模文本", "这是模型真正看到的 Prompt 内容。", renderFocusBar(run, filteredSegments.length, segments.length) + '<div class="tabs" role="tablist">' + tabHtml + '</div><div class="segments" id="context-segments">' + segmentHtml + '</div>'),
+          '<div class="section-grid">',
+            card("执行时间线", "工具调用与压缩事件。", '<div class="timeline">' + (run.timeline?.map((t, i) => '<div class="timeline-item clickable ' + (state.selectedTimelineIndex === i ? 'active' : '') + '" data-timeline-index="' + i + '"><strong>' + escapeHtml(t.title) + '</strong><small>' + (t.summary || "") + '</small></div>').join("") || "") + '</div>'),
+            card("模型思考", "Reasoning / Thinking 内容。", (run.output?.thinkingTexts?.length ? run.output.thinkingTexts.map(t => '<pre>' + escapeHtml(t) + '</pre>').join("") : '<div class="muted">无思考内容。</div>')),
+          '</div>'
+        ].join("");
+      }
 
-      const thinking = ((run.output && run.output.thinkingTexts) || []).length
-        ? run.output.thinkingTexts.map((text, index) => '<article class="segment"><strong>思考 ' + (index + 1) + '</strong><pre>' + escapeHtml(text) + '</pre></article>').join("")
-        : '<div class="muted">这次运行没有暴露可见的 thinking / reasoning 内容。</div>';
+      const header = document.querySelector(".main-header");
+      if (header) {
+        header.innerHTML = [
+          '<section class="topline">',
+            '<div><button type="button" id="back-to-dash" style="margin-bottom:8px; padding:4px 10px; font-size:12px">← 返回历史概览</button><h2>' + escapeHtml(run.provider + '/' + run.model) + '</h2><p>' + escapeHtml(run.sessionKey || run.runId) + '</p></div>',
+            '<div class="actions"><button type="button" class="primary" id="copy-json">复制 JSON</button><button type="button" id="refresh-all">刷新</button></div>',
+          '</section>',
+          navHtml
+        ].join("");
+      }
 
-      const topOrigin = (run.input.origins || [])[0];
-      const topCut = (run.input.cutFirst || [])[0];
-      const worstStage = [...(run.input.contextStages || [])].sort((a, b) => Math.abs((b.charsDelta || 0)) - Math.abs((a.charsDelta || 0)))[0];
-      const laneSummary = [
-        '<span class="badge">system ' + fmtNumber.format(run.input.systemChars || 0) + ' 字符</span>',
-        '<span class="badge">prompt ' + fmtNumber.format(run.input.promptChars || 0) + ' 字符</span>',
-        '<span class="badge">history ' + fmtNumber.format(run.input.historyChars || 0) + ' 字符</span>',
-      ].join("");
+      el.content.innerHTML = bodyHtml;
 
-      el.content.innerHTML = [
-        '<section class="topline">',
-          '<div><h2>' + escapeHtml(run.provider + '/' + run.model) + '</h2><p>' + escapeHtml(run.sessionKey || run.runId) + '</p></div>',
-          '<div class="actions"><button class="primary" id="copy-json">复制运行 JSON</button><button id="reload-diff">刷新对比</button></div>',
-        '</section>',
-        '<section class="overview-grid">',
-          overviewCard("建议顺序", "来源地图 -> 优先裁剪 -> 上下文分栏", "先看最大来源，再看最高收益裁剪项，最后再读原始文本。"),
-          overviewCard("最大来源", topOrigin ? (topOrigin.label + " · " + fmtNumber.format(topOrigin.chars) + " 字符") : "没有来源数据", topOrigin ? (topOrigin.kind + (topOrigin.path ? " · " + topOrigin.path : "")) : "这次运行没有暴露来源归因信息。"),
-          overviewCard("最优先裁剪", topCut ? (topCut.title + " · " + fmtNumber.format(topCut.chars) + " 字符") : "没有明显裁剪点", topCut ? topCut.reason : "当前没有识别到高收益的裁剪候选项。"),
-          overviewCard("变化最大阶段", worstStage ? ((stageLabels[worstStage.stage] || worstStage.stage) + " · " + prettyDelta(worstStage.charsDelta || 0) + " 字符") : "没有阶段数据", worstStage ? "这是上下文变化最大的步骤。" : "这次运行没有采到阶段快照。"),
-        '</section>',
-        '<section class="stats">',
-          stat("上下文大小", fmtNumber.format(run.input.chars) + " 字符"),
-          stat("估算 Token", fmtNumber.format(run.input.estimatedTokens)),
-          stat("噪音分", String(run.input.noiseScore)),
-          stat("重复字符", fmtNumber.format(run.input.duplicateChars)),
-        '</section>',
-        '<section class="reading-path">',
-          pathStep("先看哪里", "先看来源地图和优先裁剪，它们会告诉你钱花在了哪里。"),
-          pathStep("在哪里变大", "再看阶段变化，确认是历史裁剪、上下文组装还是修复步骤让它膨胀。"),
-          pathStep("模型真正看到了什么", "最后进入上下文分栏，只读你已经确认过最可疑的区域。"),
-        '</section>',
-        '<section class="workspace-grid">',
-          '<div class="workspace-column"><div class="workspace-title">来源与阶段</div><div class="stack">',
-            card("来源地图", "按体积从大到小排序。这里决定了 prompt 的主要成本。", '<div class="tree">' + origins + '</div>'),
-            card("注入的工作区文件", "先看是否被截断、实际注入了多少，再决定要不要深入读文件内容。", workspaceFiles || '<div class="muted">这次运行没有检测到注入的工作区文件。</div>'),
-            card("Prompt 阶段变化", "用 delta 找出上下文在哪一步变大或变小。", contextStages || '<div class="muted">这次运行没有采到阶段快照。</div>'),
-            card("近似对比", "和同一会话中的上一条可比运行做对照。", diff),
-          '</div></div>',
-          '<div class="workspace-column"><div class="workspace-title">真实送模内容</div><div class="stack">',
-            card("上下文分栏", "这里是最终送给模型的真实文本。先确认问题区域，再来读这一栏。", renderFocusBar(run, filteredSegments.length, segments.length) + '<div class="lane-summary">' + laneSummary + '</div><div class="tabs">' + tabHtml + '</div><div class="segments">' + segmentHtml + '</div>'),
-          '</div></div>',
-          '<div class="workspace-column"><div class="workspace-title">动作与运行过程</div><div class="stack">',
-            card(
-              "优先裁剪",
-              "按来源类型分组的最高收益削减项。",
-              cutFilters +
-                (cutFirst || '<div class="muted">当前筛选条件下没有明显的高收益削减项。</div>'),
-            ),
-            card("优化建议", "基于阶段变化、重复率和来源结构生成的下一步建议。", suggestions || '<div class="muted">当前没有生成建议。</div>'),
-            card("执行时间线", "运行级事件、工具调用和 compaction 检查点。", '<div class="timeline">' + timeline + '</div>'),
-            card("可见思考", "这里只展示 provider 明确暴露出来的 reasoning / thinking。", thinking),
-          '</div></div>',
-        '</section>',
-      ].join("");
-
-      for (const tab of el.content.querySelectorAll(".tab")) {
-        tab.addEventListener("click", () => {
-          const lane = tab.getAttribute("data-tab");
-          if (lane) {
-            state.activeTab = lane;
-            renderContent();
-          }
+      // 绑定
+      for (const btn of document.querySelectorAll("[data-nav]")) {
+        btn.addEventListener("click", () => { 
+          state.activeNav = btn.getAttribute("data-nav"); 
+          renderContent(); 
         });
       }
-      for (const item of el.content.querySelectorAll("[data-origin-key]")) {
-        item.addEventListener("click", () => {
-          const key = item.getAttribute("data-origin-key") || "";
-          state.selectedOriginKey = state.selectedOriginKey === key ? "" : key;
+      const backBtn = document.querySelector("#back-to-dash");
+      if (backBtn) {
+        backBtn.addEventListener("click", () => {
+          state.currentRun = null;
+          state.currentDiff = null;
+          writeRunHash("");
           renderContent();
         });
       }
-      for (const item of el.content.querySelectorAll("[data-cut-label]")) {
+      for (const btn of el.content.querySelectorAll("[data-tab]")) {
+        btn.addEventListener("click", () => { state.activeTab = btn.getAttribute("data-tab"); renderContent(); });
+      }
+      for (const item of el.content.querySelectorAll("[data-origin-key]")) {
+        item.addEventListener("click", () => { 
+          state.selectedOriginKey = state.selectedOriginKey === item.getAttribute("data-origin-key") ? "" : item.getAttribute("data-origin-key");
+          if (state.selectedOriginKey) { state.activeNav = "content"; }
+          renderContent(); 
+        });
+      }
+      for (const item of el.content.querySelectorAll("[data-segment-origin]")) {
         item.addEventListener("click", () => {
-          const kind = item.getAttribute("data-cut-kind") || "";
-          const path = item.getAttribute("data-cut-path") || "";
-          const label = item.getAttribute("data-cut-label") || "";
-          const matched = (run.input.origins || []).find((origin) =>
-            path ? origin.path === path : origin.label === label,
-          );
-          const key = matched
-            ? buildOriginKey(matched.kind, matched.path, matched.label)
-            : buildOriginKey(kind, path, label);
-          state.selectedOriginKey = state.selectedOriginKey === key ? "" : key;
+          state.selectedOriginKey = state.selectedOriginKey === item.getAttribute("data-segment-origin") ? "" : item.getAttribute("data-segment-origin");
           renderContent();
         });
       }
       for (const item of el.content.querySelectorAll("[data-stage]")) {
         item.addEventListener("click", () => {
-          const stage = item.getAttribute("data-stage") || "";
-          state.selectedStage = state.selectedStage === stage ? "" : stage;
+          state.selectedStage = state.selectedStage === item.getAttribute("data-stage") ? "" : item.getAttribute("data-stage");
           renderContent();
         });
       }
       for (const item of el.content.querySelectorAll("[data-timeline-index]")) {
         item.addEventListener("click", () => {
-          const index = Number(item.getAttribute("data-timeline-index"));
-          if (!Number.isFinite(index)) return;
-          state.selectedTimelineIndex = state.selectedTimelineIndex === index ? -1 : index;
-          const eventItem = (run.timeline || [])[index];
-          if (eventItem?.type === "before_compaction" || eventItem?.type === "after_compaction") {
-            state.selectedStage = "history-limited";
-            state.activeTab = "history";
-          }
-          if (eventItem?.type === "before_tool_call" || eventItem?.type === "after_tool_call") {
-            state.activeTab = "history";
-          }
+          const idx = Number(item.getAttribute("data-timeline-index"));
+          state.selectedTimelineIndex = state.selectedTimelineIndex === idx ? -1 : idx;
           renderContent();
         });
       }
-      for (const tab of el.content.querySelectorAll("[data-cut-filter]")) {
-        tab.addEventListener("click", () => {
-          const filter = tab.getAttribute("data-cut-filter");
-          if (filter) {
-            state.cutFilter = filter;
-            renderContent();
-          }
-        });
-      }
+      document.querySelector("#refresh-all")?.addEventListener("click", refresh);
+      document.querySelector("#copy-json")?.addEventListener("click", async () => {
+        await navigator.clipboard.writeText(JSON.stringify(run, null, 2));
+        flashHint("已复制 JSON");
+      });
       el.content.querySelector("#clear-focus")?.addEventListener("click", () => {
         state.selectedOriginKey = "";
         state.selectedStage = "";
         state.selectedTimelineIndex = -1;
         renderContent();
       });
-      el.content.querySelector("#copy-json")?.addEventListener("click", async () => {
-        await navigator.clipboard.writeText(JSON.stringify(run, null, 2));
-      });
-      el.content.querySelector("#reload-diff")?.addEventListener("click", async () => {
-        if (!state.currentRun) return;
-        state.currentDiff = await fetchJson("/plugins/context-inspector/api/runs/" + encodeURIComponent(state.currentRun.runId) + "/diff");
-        renderContent();
-      });
+      
+      restoreScroll(scrollSnap);
     }
 
     function stat(label, value) {
@@ -982,51 +1402,99 @@ export function buildContextInspectorHtml(): string {
     }
 
     function card(title, lead, body) {
-      return '<section class="card"><div class="card-head"><div><div class="section-label">' + escapeHtml(title) + '</div><h3>' + escapeHtml(title) + '</h3></div></div><p class="card-lead">' + escapeHtml(lead) + '</p>' + body + '</section>';
+      return (
+        '<section class="card"><h3 class="card-title">' +
+        escapeHtml(title) +
+        '</h3><p class="card-lead">' +
+        escapeHtml(lead) +
+        "</p>" +
+        body +
+        "</section>"
+      );
+    }
+
+    async function loadRunBody(runId) {
+      if (!runId) {
+        throw new Error("缺少 runId");
+      }
+      state.currentRun = await fetchJson(
+        "/plugins/context-inspector/api/runs/" + encodeURIComponent(runId),
+      );
+      state.currentDiff = await fetchJson(
+        "/plugins/context-inspector/api/runs/" + encodeURIComponent(runId) + "/diff",
+      );
+      writeRunHash(runId);
+      state.lastError = "";
+      setStatusBanner("", "");
     }
 
     async function loadRun(runId) {
       if (!runId) return;
-      state.currentRun = await fetchJson("/plugins/context-inspector/api/runs/" + encodeURIComponent(runId));
-      state.currentDiff = await fetchJson("/plugins/context-inspector/api/runs/" + encodeURIComponent(runId) + "/diff");
+      setBusy(1);
+      try {
+        await loadRunBody(runId);
+      } catch (error) {
+        state.lastError = String(error);
+        setStatusBanner("加载运行失败：" + state.lastError, "error");
+        state.currentRun = null;
+        state.currentDiff = null;
+      } finally {
+        setBusy(-1);
+      }
       renderRuns();
       renderContent();
     }
 
     async function refresh() {
-      state.runs = await fetchJson("/plugins/context-inspector/api/runs?limit=80");
-      if (!state.currentRun && state.runs[0]) {
-        await loadRun(state.runs[0].runId);
-        return;
-      }
-      if (state.currentRun) {
-        const fresh = state.runs.find((run) => run.runId === state.currentRun.runId);
-        if (fresh) {
-          state.currentRun = await fetchJson("/plugins/context-inspector/api/runs/" + encodeURIComponent(fresh.runId));
-          state.currentDiff = await fetchJson("/plugins/context-inspector/api/runs/" + encodeURIComponent(fresh.runId) + "/diff");
+      setBusy(1);
+      state.lastError = "";
+      try {
+        state.runs = await fetchJson("/plugins/context-inspector/api/runs?limit=80");
+        const hashId = readRunIdFromHash();
+        if (hashId && state.runs.some((run) => run.runId === hashId)) {
+          await loadRunBody(hashId);
+        } else if (hashId && state.runs.length > 0) {
+          flashHint("地址中的运行已不在保留列表（可能已被修剪），已改为打开最新一条。");
+          await loadRunBody(state.runs[0].runId);
+        } else if (state.currentRun) {
+          const fresh = state.runs.find((run) => run.runId === state.currentRun.runId);
+          if (fresh) {
+            await loadRunBody(fresh.runId);
+          }
         }
+        renderRuns();
+        renderContent();
+      } catch (error) {
+        state.lastError = String(error);
+        setStatusBanner("刷新失败：" + state.lastError, "error");
+        el.content.innerHTML =
+          '<div class="empty">无法加载运行列表。请确认插件已启用且网关可达，然后重试。<br/><br/>' +
+          escapeHtml(state.lastError) +
+          "</div>";
+      } finally {
+        setBusy(-1);
       }
-      renderRuns();
-      renderContent();
     }
 
     el.search.addEventListener("input", (event) => {
       state.query = event.target.value;
       renderRuns();
     });
-    el.refresh.addEventListener("click", refresh);
-    el.compare.addEventListener("click", async () => {
-      if (!state.currentRun) return;
-      state.currentDiff = await fetchJson("/plugins/context-inspector/api/runs/" + encodeURIComponent(state.currentRun.runId) + "/diff");
-      renderContent();
+    window.addEventListener("hashchange", () => {
+      const id = readRunIdFromHash();
+      if (id) {
+        void loadRun(id);
+      }
     });
     refresh().catch((error) => {
-      el.content.innerHTML = '<div class="empty">加载运行记录失败：' + escapeHtml(String(error)) + '</div>';
+      state.lastError = String(error);
+      setStatusBanner("初始化失败：" + state.lastError, "error");
+      el.content.innerHTML = '<div class="empty">加载运行记录失败：' + escapeHtml(String(error)) + "</div>";
     });
   `;
 
   return `<!doctype html>
-  <html lang="en">
+  <html lang="zh-CN">
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -1046,25 +1514,20 @@ export function buildContextInspectorHtml(): string {
                 <li>先看来源地图和优先裁剪。</li>
                 <li>最后再打开上下文分栏。</li>
               </ol>
+              <p class="hero-tip">协作排障：选中某次运行后地址栏会出现 <code>#run=…</code>，复制整段 URL 可让别人打开同一条记录。</p>
             </div>
           </section>
           <section class="toolbar">
-            <input id="search" type="search" placeholder="搜索运行、会话、模型或 provider" />
+            <input id="search" type="search" placeholder="搜索运行、会话、模型或 provider" aria-label="搜索运行记录" />
           </section>
           <section class="runs" id="runs"></section>
         </aside>
-        <main class="panel main">
-          <section class="topline">
-            <div>
-              <h2 id="heading">上下文工作台</h2>
-              <p id="subtitle">先选择一条运行记录，再进入分析。</p>
-            </div>
-            <div class="actions">
-              <button id="refresh" class="primary">刷新运行</button>
-              <button id="compare">刷新对比</button>
-            </div>
-          </section>
-          <section id="content"></section>
+        <main class="panel main" id="inspector-main">
+          <header class="main-header"></header>
+          <div id="status-banner" class="status-banner" role="status" aria-live="polite" hidden></div>
+          <div class="main-scroll">
+            <section id="content"></section>
+          </div>
         </main>
       </div>
       <script>
