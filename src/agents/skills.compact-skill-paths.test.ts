@@ -1,61 +1,67 @@
-import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildWorkspaceSkillsPrompt } from "./skills.js";
-import { writeSkill } from "./skills.test-helpers.js";
-
-async function withTempWorkspace(run: (workspaceDir: string) => Promise<void>) {
-  const workspaceDir = await fs.mkdtemp(path.join(os.tmpdir(), "openclaw-compact-"));
-  try {
-    await run(workspaceDir);
-  } finally {
-    await fs.rm(workspaceDir, { recursive: true, force: true });
-  }
-}
+import { createCanonicalFixtureSkill } from "./skills.test-helpers.js";
+import { buildWorkspaceSkillsPrompt } from "./skills/workspace.js";
 
 describe("compactSkillPaths", () => {
-  it("keeps absolute skill locations under the home directory", async () => {
-    await withTempWorkspace(async (workspaceDir) => {
-      const skillDir = path.join(workspaceDir, "skills", "test-skill");
-
-      await writeSkill({
-        dir: skillDir,
-        name: "test-skill",
-        description: "A test skill for path compaction",
-      });
-
-      const prompt = buildWorkspaceSkillsPrompt(workspaceDir, {
-        bundledSkillsDir: path.join(workspaceDir, ".bundled-empty"),
-        managedSkillsDir: path.join(workspaceDir, ".managed-empty"),
-      });
-
-      expect(prompt).toContain(path.join(skillDir, "SKILL.md"));
-
-      // The skill name and description should still be present
-      expect(prompt).toContain("test-skill");
-      expect(prompt).toContain("A test skill for path compaction");
+  function buildPromptForFixtureSkill(params: {
+    workspaceRoot: string;
+    skillDir: string;
+    name: string;
+    description: string;
+  }) {
+    return buildWorkspaceSkillsPrompt(params.workspaceRoot, {
+      entries: [
+        {
+          skill: createCanonicalFixtureSkill({
+            name: params.name,
+            description: params.description,
+            filePath: path.join(params.skillDir, "SKILL.md"),
+            baseDir: params.skillDir,
+            source: "test",
+          }),
+          frontmatter: {},
+          metadata: undefined,
+          invocation: { disableModelInvocation: false, userInvocable: true },
+          exposure: {
+            includeInRuntimeRegistry: true,
+            includeInAvailableSkillsPrompt: true,
+            userInvocable: true,
+          },
+        },
+      ],
     });
+  }
+
+  it("keeps absolute skill locations under the home directory", () => {
+    const home = os.homedir();
+    const skillDir = path.join(home, ".openclaw-test-skills", "test-skill");
+
+    const prompt = buildPromptForFixtureSkill({
+      workspaceRoot: home,
+      skillDir,
+      name: "test-skill",
+      description: "A test skill for path compaction",
+    });
+
+    expect(prompt).toContain(path.join(skillDir, "SKILL.md"));
+    expect(prompt).toContain("test-skill");
+    expect(prompt).toContain("A test skill for path compaction");
   });
 
-  it("preserves paths outside home directory", async () => {
-    // Skills outside ~ should keep their absolute paths
-    await withTempWorkspace(async (workspaceDir) => {
-      const skillDir = path.join(workspaceDir, "skills", "ext-skill");
+  it("preserves paths outside home directory", () => {
+    const outsideHome = path.join(path.parse(os.homedir()).root, "openclaw-external-skills");
+    const skillDir = path.join(outsideHome, "skills", "ext-skill");
 
-      await writeSkill({
-        dir: skillDir,
-        name: "ext-skill",
-        description: "External skill",
-      });
-
-      const prompt = buildWorkspaceSkillsPrompt(workspaceDir, {
-        bundledSkillsDir: path.join(workspaceDir, ".bundled-empty"),
-        managedSkillsDir: path.join(workspaceDir, ".managed-empty"),
-      });
-
-      // Should still contain a valid location tag
-      expect(prompt).toMatch(/<location>[^<]+SKILL\.md<\/location>/);
+    const prompt = buildPromptForFixtureSkill({
+      workspaceRoot: outsideHome,
+      skillDir,
+      name: "ext-skill",
+      description: "External skill",
     });
+
+    expect(prompt).toMatch(/<location>[^<]+SKILL\.md<\/location>/);
+    expect(prompt).toContain(path.join(skillDir, "SKILL.md"));
   });
 });

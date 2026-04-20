@@ -62,7 +62,7 @@ export type FeishuReactionCreatedEvent = {
   chat_type?: string;
   reaction_type?: { emoji_type?: string };
   operator_type?: string;
-  user_id?: { open_id?: string };
+  user_id?: { open_id?: string; user_id?: string };
   action_time?: string;
 };
 
@@ -100,6 +100,7 @@ export async function resolveReactionSyntheticEvent(
   const emoji = event.reaction_type?.emoji_type;
   const messageId = event.message_id;
   const senderId = event.user_id?.open_id;
+  const senderUserId = event.user_id?.user_id;
   if (!emoji || !messageId || !senderId) {
     return null;
   }
@@ -154,7 +155,10 @@ export async function resolveReactionSyntheticEvent(
   const syntheticChatType: FeishuChatType = resolvedChatType;
   return {
     sender: {
-      sender_id: { open_id: senderId },
+      sender_id: {
+        open_id: senderId,
+        ...(senderUserId ? { user_id: senderUserId } : {}),
+      },
       sender_type: "user",
     },
     message: {
@@ -662,6 +666,11 @@ function registerEventHandlers(
             if (syntheticMessageId) {
               await recordProcessedFeishuMessage(syntheticMessageId, accountId, log);
             }
+          } catch (err) {
+            if (syntheticMessageId && !isFeishuRetryableSyntheticEventError(err)) {
+              await recordProcessedFeishuMessage(syntheticMessageId, accountId, log);
+            }
+            throw err;
           } finally {
             if (syntheticMessageId) {
               releaseFeishuMessageProcessing(syntheticMessageId, accountId);

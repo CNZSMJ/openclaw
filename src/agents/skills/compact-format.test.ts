@@ -255,6 +255,20 @@ describe("applySkillsPromptLimits (via buildWorkspaceSkillsPrompt)", () => {
     expect(prompt).not.toContain("~/");
   });
 
+  it("skills are sorted alphabetically regardless of entry insertion order", () => {
+    // Entries provided in reverse alphabetical order should still produce
+    // an alphabetically sorted prompt (fixes #64167).
+    const entries = ["zoo", "apple", "mango", "banana"].map((n) =>
+      makeEntry(makeSkill(n, `${n} skill`)),
+    );
+    const prompt = buildWorkspaceSkillsPrompt("/fake", {
+      entries,
+      config: { skills: { limits: { maxSkillsPromptChars: 50_000 } } } satisfies OpenClawConfig,
+    });
+    const nameMatches = [...prompt.matchAll(/<name>(\w+)<\/name>/g)].map((m) => m[1]);
+    expect(nameMatches).toEqual(["apple", "banana", "mango", "zoo"]);
+  });
+
   it("snapshot prompt and resolvedSkills both keep canonical paths", () => {
     const home = os.homedir();
     const skills = Array.from({ length: 5 }, (_, i) =>

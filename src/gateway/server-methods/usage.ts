@@ -16,6 +16,7 @@ import type {
 } from "../../infra/session-cost-usage.js";
 import {
   loadCostUsageSummary,
+  loadSessionLogs,
   loadSessionCostSummary,
   loadSessionUsageTimeSeries,
   discoverAllSessions,
@@ -293,7 +294,7 @@ async function discoverAllSessionsForUsage(params: {
         startMs: params.startMs,
         endMs: params.endMs,
       });
-      return sessions.map((session) => ({ ...session, agentId: agent.id }));
+      return sessions.map((session) => Object.assign({}, session, { agentId: agent.id }));
     }),
   );
   return results.flat().toSorted((a, b) => b.mtime - a.mtime);
@@ -917,7 +918,6 @@ export const usageHandlers: GatewayRequestHandlers = {
     }
     const { config, entry, agentId, sessionId, sessionFile } = resolved;
 
-    const { loadSessionLogs } = await import("../../infra/session-cost-usage.js");
     const logs = await loadSessionLogs({
       sessionId,
       sessionEntry: entry,
