@@ -4,11 +4,14 @@ import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { resolvePnpmRunner } from "./pnpm-runner.mjs";
 
+const require = createRequire(import.meta.url);
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const tscBin = require.resolve("typescript/bin/tsc");
 const hashFile = path.join(rootDir, "src", "canvas-host", "a2ui", ".bundle.hash");
 const outputFile = path.join(rootDir, "src", "canvas-host", "a2ui", "a2ui.bundle.js");
 const a2uiRendererDir = path.join(rootDir, "vendor", "a2ui", "renderers", "lit");
@@ -215,7 +218,9 @@ async function main() {
     }
   }
 
-  runPnpm(["-s", "exec", "tsc", "-p", path.join(a2uiRendererDir, "tsconfig.json")]);
+  // Resolve the local TypeScript CLI directly instead of shelling through
+  // `pnpm exec tsc`, which can be terminated unexpectedly on some hosts.
+  runStep(process.execPath, [tscBin, "-p", path.join(a2uiRendererDir, "tsconfig.json")]);
 
   const localRolldownCliCandidates = getLocalRolldownCliCandidates(rootDir);
   const localRolldownCli = (
