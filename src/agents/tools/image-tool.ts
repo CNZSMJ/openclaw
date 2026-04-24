@@ -1,5 +1,5 @@
 import { resolve, isAbsolute } from "node:path";
-import { Type } from "@sinclair/typebox";
+import { Type } from "typebox";
 import type { OpenClawConfig } from "../../config/types.openclaw.js";
 import {
   resolveAutoMediaKeyProviders,
@@ -19,6 +19,7 @@ import {
   coerceImageAssistantText,
   coerceImageModelConfig,
   decodeDataUrl,
+  hasImageReasoningOnlyResponse,
   type ImageModelConfig,
   resolveProviderVisionModelFromConfig,
 } from "./image-tool.helpers.js";
@@ -71,6 +72,7 @@ function resolveRemoteImageSsrFPolicy(cfg?: OpenClawConfig) {
 export const __testing = {
   decodeDataUrl,
   coerceImageAssistantText,
+  hasImageReasoningOnlyResponse,
   resolveImageToolMaxTokens,
   resolveRemoteImageSsrFPolicy,
   setProviderDepsForTest(overrides?: {

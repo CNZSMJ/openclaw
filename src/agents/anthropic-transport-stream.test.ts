@@ -415,26 +415,26 @@ describe("anthropic transport stream", () => {
   });
 
   it("fails when the anthropic stream ends before closing a content block", async () => {
-    anthropicMessagesStreamMock.mockReturnValueOnce(
-      (async function* () {
-        yield {
+    guardedFetchMock.mockResolvedValueOnce(
+      createSseResponse([
+        {
           type: "message_start",
           message: { id: "msg_1", usage: { input_tokens: 10, output_tokens: 0 } },
-        };
-        yield {
+        },
+        {
           type: "content_block_start",
           index: 0,
           content_block: {
             type: "text",
             text: "",
           },
-        };
-        yield {
+        },
+        {
           type: "content_block_delta",
           index: 0,
           delta: { type: "text_delta", text: "partial output" },
-        };
-      })(),
+        },
+      ]),
     );
     const streamFn = createAnthropicMessagesTransportStreamFn();
     const result = await (
@@ -467,30 +467,30 @@ describe("anthropic transport stream", () => {
   });
 
   it("fails when the anthropic stream ends without a terminal stop reason", async () => {
-    anthropicMessagesStreamMock.mockReturnValueOnce(
-      (async function* () {
-        yield {
+    guardedFetchMock.mockResolvedValueOnce(
+      createSseResponse([
+        {
           type: "message_start",
           message: { id: "msg_1", usage: { input_tokens: 10, output_tokens: 0 } },
-        };
-        yield {
+        },
+        {
           type: "content_block_start",
           index: 0,
           content_block: {
             type: "text",
             text: "",
           },
-        };
-        yield {
+        },
+        {
           type: "content_block_delta",
           index: 0,
           delta: { type: "text_delta", text: "complete but unfinalized" },
-        };
-        yield {
+        },
+        {
           type: "content_block_stop",
           index: 0,
-        };
-      })(),
+        },
+      ]),
     );
     const streamFn = createAnthropicMessagesTransportStreamFn();
     const result = await (

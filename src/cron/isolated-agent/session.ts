@@ -60,9 +60,10 @@ export function resolveCronSession(params: {
     systemSent = false;
   }
 
+  const previousSessionId = isNewSession ? entry?.sessionId : undefined;
   clearBootstrapSnapshotOnSessionRollover({
     sessionKey: params.sessionKey,
-    previousSessionId: isNewSession ? entry?.sessionId : undefined,
+    previousSessionId,
   });
 
   const sessionEntry: SessionEntry = {
@@ -87,5 +88,5 @@ export function resolveCronSession(params: {
       sessionFile: undefined,
     }),
   };
-  return { storePath, store, sessionEntry, systemSent, isNewSession };
+  return { storePath, store, sessionEntry, systemSent, isNewSession, previousSessionId };
 }

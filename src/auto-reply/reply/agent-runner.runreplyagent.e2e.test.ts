@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import type { RunEmbeddedPiAgentParams } from "../../agents/pi-embedded-runner/run/params.js";
 import type { SessionEntry } from "../../config/sessions.js";
 import type { TypingMode } from "../../config/types.js";
 import {
@@ -39,6 +40,8 @@ type AgentRunParams = {
   onAgentEvent?: (evt: { stream: string; data: Record<string, unknown> }) => void;
   silentExpected?: boolean;
 };
+
+type EmbeddedRunParams = RunEmbeddedPiAgentParams;
 
 const state = vi.hoisted(() => ({
   compactEmbeddedPiSessionMock: vi.fn(),
